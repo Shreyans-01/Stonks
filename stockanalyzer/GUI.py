@@ -5,6 +5,11 @@ except ImportError:
     # Python3
     import tkinter as tk
 import matplotlib
+#Data Source
+import yfinance as yf
+
+#Data viz
+import plotly.graph_objs as go
 matplotlib.use('TkAgg')
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
@@ -190,19 +195,19 @@ class StartPage(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller
 
-        load = Image.open("/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/startBackground.jpeg")
+        load = Image.open("/OSTPL-MiniProject/stockanalyzer/assets/startBackground.jpeg")
         banner = ImageTk.PhotoImage(load)
         w = tk.Label(self, image=banner)
         w.image = banner
         w.place(x=0, y=0, relwidth=1, relheight=1)
 
         # Start Button
-        self.startImage = tk.PhotoImage(file="/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/startButton.gif")
+        self.startImage = tk.PhotoImage(file="/OSTPL-MiniProject/stockanalyzer/assets/startButton.gif")
         button = tk.Button(self,image=self.startImage, command=lambda: controller.show_frame("PageOne"))
         button.place(x=140, y=300)
 
         # Close Button
-        self.closeImage = tk.PhotoImage(file="/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/closeButton.gif")
+        self.closeImage = tk.PhotoImage(file="/OSTPL-MiniProject/stockanalyzer/assets/closeButton.gif")
         close_button = Button(self,image=self.closeImage, command=self.quit)
         close_button.place(x=500, y=300)
 
@@ -213,7 +218,7 @@ class PageOne(tk.Frame):
         self.controller = controller
 
         # Title Page of Page One
-        load = Image.open("/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/background.jpeg")
+        load = Image.open("/OSTPL-MiniProject/stockanalyzer/assets/background.jpeg")
         new_image= load.resize((840,100))
         banner = ImageTk.PhotoImage(new_image)
         w = tk.Label(self, image=banner)
@@ -221,7 +226,7 @@ class PageOne(tk.Frame):
         w.place(x=0, y=0)
 
         # calculate button
-        self.button_Image = tk.PhotoImage(file="/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/calculateButton.gif")
+        self.button_Image = tk.PhotoImage(file="/OSTPL-MiniProject/stockanalyzer/assets/calculateButton.gif")
         button_calculate = tk.Button(self, image=self.button_Image, command= lambda: self.averageTesting())
         button_calculate.place(x=140, y=220)
 
@@ -258,6 +263,8 @@ class PageOne(tk.Frame):
         self.tickerSymbol = StringVar()
         self.entry_tickerSymbol = tk.Entry(self, textvariable=self.tickerSymbol)
         self.entry_tickerSymbol.place(x=200, y=150, width=100)
+
+        
 
         # Display the check boxes
         self.selectionButtons()
@@ -319,18 +326,10 @@ class PageOne(tk.Frame):
 
     # Execute TicketSymbol and Average Calculation
     def averageTesting(self, event=None):
-        if self.average_open.get() == 0 and self.average_high.get() == 0 and self.average_low.get() == 0 and \
-                        self.average_close.get() == 0 and self.average_volume.get() == 0 and len(self.tickerSymbol.get()) == 0:
-            messagebox.showerror("User Entry Error", "Insert a ticker symbol & check which you would like calculate")
-        elif self.average_open.get() == 0 and self.average_high.get() == 0 and self.average_low.get() == 0 and \
-                 self.average_close.get() == 0 and self.average_volume.get() == 0:
-            messagebox.showerror("Check Boxes Error", "Check which you would like to calculate")
-        else:
-            self.individual_list = []
-            self.objectX = create_stockInstance(self.tickerSymbol.get())
-            get_Data(self.tickerSymbol.get(), self.objectX, self.individual_list)
-            self.cleanedUpList = cleanedUpList(self.individual_list)
-            self.average()
+        data = yf.download(tickers=self.tickerSymbol.get(), period='10d', interval='5m')
+        # print(self.tickerSymbol.get())
+        print(data)
+        
 
     def get_Object(self):
         #print("PAGE ONE SELF OBJECTX: ", self.objectX)
@@ -423,7 +422,7 @@ class PageTwo(PageOne):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-        load = Image.open("/Users/vishn/StockAnalyzer/stockanalyzer/assets/graphBanner.gif")
+        load = Image.open("/OSTPL-MiniProject/stockanalyzer/assets/graphBanner.gif")
         banner = ImageTk.PhotoImage(load)
         w = tk.Label(self, image=banner)
         w.image = banner
