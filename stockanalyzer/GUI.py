@@ -15,6 +15,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 import numpy as np
 from tkinter import *
+from predict import *
 import sys
 import os
 import urllib.request
@@ -195,19 +196,19 @@ class StartPage(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller
 
-        load = Image.open("/OSTPL-MiniProject/stockanalyzer/assets/startBackground.jpeg")
+        load = Image.open("/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/startBackground.jpeg")
         banner = ImageTk.PhotoImage(load)
         w = tk.Label(self, image=banner)
         w.image = banner
         w.place(x=0, y=0, relwidth=1, relheight=1)
 
         # Start Button
-        self.startImage = tk.PhotoImage(file="/OSTPL-MiniProject/stockanalyzer/assets/startButton.gif")
+        self.startImage = tk.PhotoImage(file="/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/startButton.gif")
         button = tk.Button(self,image=self.startImage, command=lambda: controller.show_frame("PageOne"))
         button.place(x=140, y=300)
 
         # Close Button
-        self.closeImage = tk.PhotoImage(file="/OSTPL-MiniProject/stockanalyzer/assets/closeButton.gif")
+        self.closeImage = tk.PhotoImage(file="/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/closeButton.gif")
         close_button = Button(self,image=self.closeImage, command=self.quit)
         close_button.place(x=500, y=300)
 
@@ -218,7 +219,7 @@ class PageOne(tk.Frame):
         self.controller = controller
 
         # Title Page of Page One
-        load = Image.open("/OSTPL-MiniProject/stockanalyzer/assets/background.jpeg")
+        load = Image.open("/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/background.jpeg")
         new_image= load.resize((840,100))
         banner = ImageTk.PhotoImage(new_image)
         w = tk.Label(self, image=banner)
@@ -226,7 +227,7 @@ class PageOne(tk.Frame):
         w.place(x=0, y=0)
 
         # calculate button
-        self.button_Image = tk.PhotoImage(file="/OSTPL-MiniProject/stockanalyzer/assets/calculateButton.gif")
+        self.button_Image = tk.PhotoImage(file="/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/calculateButton.gif")
         button_calculate = tk.Button(self, image=self.button_Image, command= lambda: self.averageTesting())
         button_calculate.place(x=140, y=220)
 
@@ -326,8 +327,9 @@ class PageOne(tk.Frame):
 
     # Execute TicketSymbol and Average Calculation
     def averageTesting(self, event=None):
-        data = yf.download(tickers=self.tickerSymbol.get(), period='10d', interval='5m')
+        data = yf.download(tickers=self.tickerSymbol.get(), period='3y', interval='1d')
         # print(self.tickerSymbol.get())
+        processing(data)
         print(data)
         
 
@@ -350,6 +352,7 @@ class PageOne(tk.Frame):
         try:
             self.destroy()
         except:
+            
             pass
 
         open = Stock(self.objectX).average_open(self.cleanedUpList)
@@ -422,7 +425,7 @@ class PageTwo(PageOne):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-        load = Image.open("/OSTPL-MiniProject/stockanalyzer/assets/graphBanner.gif")
+        load = Image.open("/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/graphBanner.gif")
         banner = ImageTk.PhotoImage(load)
         w = tk.Label(self, image=banner)
         w.image = banner
