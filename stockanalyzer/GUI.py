@@ -9,10 +9,13 @@ try:
     import urllib.request
     import os
     import sys
-
+    import matplotlib.pyplot as plt
     import numpy as np
     from matplotlib.figure import Figure
     from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+    from matplotlib.backends.backend_tkagg import (
+        FigureCanvasTkAgg, NavigationToolbar2Tk)
     # Python2
     import tkinter as tk
 except ImportError:
@@ -28,7 +31,7 @@ import plotly.graph_objs as go
 import matplotlib.pyplot as plt
 import pandas as pd
 matplotlib.use('TkAgg')
-from predict import *
+
 
 #================================STOCK CLASS===================================#
 # Constant(s)
@@ -57,10 +60,11 @@ class Stock(object):
         print('---------------------------------------------------------------------------------------')
         print(average)
         return average
-    
+
     def pred():
         global data
         return data
+
     def average_high():
         total_sum = 0
         counter = 0
@@ -176,7 +180,7 @@ class Page(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        for F in (StartPage, PageOne, PageTwo,PageThree):
+        for F in (StartPage, PageOne, PageTwo, PageThree):
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
@@ -205,7 +209,7 @@ class StartPage(tk.Frame):
         self.controller = controller
 
         load = Image.open(
-            "/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/startBackground.jpeg")
+            "/Users/onesh/OSTPL-MiniProject/stockanalyzer/assets/startBackground.jpeg")
         banner = ImageTk.PhotoImage(load)
         w = tk.Label(self, image=banner)
         w.image = banner
@@ -213,14 +217,14 @@ class StartPage(tk.Frame):
 
         # Start Button
         self.startImage = tk.PhotoImage(
-            file="/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/startButton.gif")
+            file="/Users/onesh/OSTPL-MiniProject/stockanalyzer/assets/startButton.gif")
         button = tk.Button(self, image=self.startImage,
                            command=lambda: controller.show_frame("PageOne"))
         button.place(x=140, y=300)
 
         # Close Button
         self.closeImage = tk.PhotoImage(
-            file="/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/closeButton.gif")
+            file="/Users/onesh/OSTPL-MiniProject/stockanalyzer/assets/closeButton.gif")
         close_button = Button(self, image=self.closeImage, command=self.quit)
         close_button.place(x=500, y=300)
 
@@ -232,7 +236,7 @@ class PageOne(tk.Frame):
         self.canvas = FigureCanvasTkAgg(self.f)
         self.canvas.get_tk_widget().place(x=30, y=200)
         img = PhotoImage(
-            file="/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/background.jpeg")
+            file="/Users/onesh/OSTPL-MiniProject/stockanalyzer/assets/background.jpeg")
         canvas.create_image(20, 20, anchor=NW, image=img)
         self.canvas.draw()
 
@@ -242,7 +246,7 @@ class PageOne(tk.Frame):
 
         # Title Page of Page One
         load = Image.open(
-            "/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/background.jpeg")
+            "/Users/onesh/OSTPL-MiniProject/stockanalyzer/assets/background.jpeg")
         new_image = load.resize((840, 100))
         banner = ImageTk.PhotoImage(new_image)
         w = tk.Label(self, image=banner)
@@ -251,12 +255,13 @@ class PageOne(tk.Frame):
 
         # calculate button
         self.button_Image = tk.PhotoImage(
-            file="/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/calculateButton.gif")
+            file="/Users/onesh/OSTPL-MiniProject/stockanalyzer/assets/calculateButton.gif")
         button_calculate = tk.Button(
-            self, text="Calculate", command=lambda: self.averageTesting(),width=10)
+            self, text="Calculate", command=lambda: self.averageTesting(), width=10)
         button_calculate.place(x=140, y=220)
 
-        button_predict = tk.Button(self, text="Prediction",width=10,command=combine_funcs(lambda: controller.show_frame("PageThree"), self.clearLabels))
+        button_predict = tk.Button(self, text="Prediction", width=10, command=combine_funcs(
+            lambda: controller.show_frame("PageThree"), self.clearLabels))
         button_predict.place(x=140, y=275)
 
         # Second Page Graph Button
@@ -364,7 +369,7 @@ class PageOne(tk.Frame):
         # print(self.tickerSymbol.get())
         # processing(data)
         print(data)
-        self.data=data
+        self.data = data
         data.reset_index(level=0, inplace=True)
         data.head()
         fig = go.Figure(data=go.Ohlc(x=data['Date'],
@@ -494,7 +499,7 @@ class PageTwo(PageOne):
         tk.Frame.__init__(self, parent)
         self.controller = controller
         load = Image.open(
-            "/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/graphBanner.gif")
+            "/Users/onesh/OSTPL-MiniProject/stockanalyzer/assets/graphBanner.gif")
         banner = ImageTk.PhotoImage(load)
         w = tk.Label(self, image=banner)
         w.image = banner
@@ -523,6 +528,7 @@ class PageTwo(PageOne):
         self.selectionButtons()
 
     def print_it(self):
+        global data
         try:
             self.clearCanvas()
             self.canvas.get_tk_widget().destory()
@@ -532,51 +538,56 @@ class PageTwo(PageOne):
         if self.selectedValue() == 0:
             messagebox.showerror("Oops!", "Select how many days to graph")
         else:
-            self.f = Figure(figsize=(5, 5), dpi=110)
-            self.p = self.f.gca()
 
+            self.f = Figure(figsize=(4, 4), dpi=110)
             daysVar = self.days.get()
-            page_one = self.controller.get_page("PageOne")
+            self.f = data.plot(x='Date', y='Open', style='b-', grid=True)
+            # plot1 = self.f.add_subplot(111)
+            # page_one = self.controller.get_page("PageOne")
             # open = page_one.average_open.get()
-            open = 102
-            high = page_one.average_high.get()
-            low = page_one.average_low.get()
-            close = page_one.average_close.get()
-            volume = page_one.average_volume.get()
+            # Open = data['Open'].tolist()
+            # high = data['High'].tolist()
+            # low = data['Low'].tolist()
+            # close = data['Close'].tolist()
+            # volume = data['Volume'].tolist()
+            # date = data['Date'].tolist()
 
-            self.objectY = page_one.get_Object()
-            # print("PAGE TWO OBJECTY:", self.objectY)
+            self.createCanvas()
+        # plt.show
+        # self.objectY = page_one.get_Object()
+        # # print("PAGE TWO OBJECTY:", self.objectY)
 
-            pageTwo_cleanedUpList = convertToFloat(page_one.individual_list)
+        # pageTwo_cleanedUpList = convertToFloat(page_one.individual_list)
 
-            # Returns list and the length of the list in a tuple
-            self.varOpen = Stock(self.objectY).pageTwo_Open(
-                daysVar, pageTwo_cleanedUpList)
-            self.varHigh = Stock(self.objectY).pageTwo_High(
-                daysVar, pageTwo_cleanedUpList)
-            self.varLow = Stock(self.objectY).pageTwo_Low(
-                daysVar, pageTwo_cleanedUpList)
-            self.varClose = Stock(self.objectY).pageTwo_Close(
-                daysVar, pageTwo_cleanedUpList)
-            self.varVolume = Stock(self.objectY).pageTwo_Volume(
-                daysVar, pageTwo_cleanedUpList)
+        # # Returns list and the length of the list in a tuple
+        # self.varOpen = Stock(self.objectY).pageTwo_Open(
+        #     daysVar, pageTwo_cleanedUpList)
+        # self.varHigh = Stock(self.objectY).pageTwo_High(
+        #     daysVar, pageTwo_cleanedUpList)
+        # self.varLow = Stock(self.objectY).pageTwo_Low(
+        #     daysVar, pageTwo_cleanedUpList)
+        # self.varClose = Stock(self.objectY).pageTwo_Close(
+        #     daysVar, pageTwo_cleanedUpList)
+        # self.varVolume = Stock(self.objectY).pageTwo_Volume(
+        #     daysVar, pageTwo_cleanedUpList)
 
-            switches = [open, high, low, close, volume]
-            options = [self.createOpen, self.createHigh,
-                       self.createLow, self.createClose, self.createVolume]
-            pageTwo_gotten = []
-            for i, switch in enumerate(switches):
-                if switch:
-                    # print("SWITCH:", switch, " at", i)
-                    pageTwo_gotten.append(options[i])
-                    # createCanvas(self.f)
-            pageTwo_gotten.append(self.createCanvas)
-            length = len(pageTwo_gotten)
+        # switches = [open, high, low, close, volume]
+        # options = [self.createOpen, self.createHigh,
+        #            self.createLow, self.createClose, self.createVolume]
+        # pageTwo_gotten = []
+        # for i, switch in enumerate(switches):
+        #     if switch:
+        #         # print("SWITCH:", switch, " at", i)
+        #         pageTwo_gotten.append(options[i])
+        #         # createCanvas(self.f)
+        # pageTwo_gotten.append(self.createCanvas)
+        # length = len(pageTwo_gotten)
 
-            for i in range(length):
-                pageTwo_gotten[i]()
+        # for i in range(length):
+        #     pageTwo_gotten[i]()
 
     # Create Canvas
+
     def createCanvas(self):
         self.canvas = FigureCanvasTkAgg(self.f)
         self.canvas.get_tk_widget().place(x=30, y=200)
@@ -640,7 +651,7 @@ class PageThree(PageOne):
         tk.Frame.__init__(self, parent)
         self.controller = controller
         load = Image.open(
-            "/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/graphBanner.gif")
+            "/Users/onesh/OSTPL-MiniProject/stockanalyzer/assets/graphBanner.gif")
         banner = ImageTk.PhotoImage(load)
         w = tk.Label(self, image=banner)
         w.image = banner
@@ -649,9 +660,9 @@ class PageThree(PageOne):
         button_back = tk.Button(self, text="Restart",
                                 command=restart)
         button_back.place(x=50, y=130)
-        self.button2 = tk.Button(
-            self, text='Print Graph', command=lambda: self.something())
-        self.button2.place(x=200, y=130)
+        # self.button2 = tk.Button(
+        #     self, text='Print Graph', command=lambda: self.something())
+        # self.button2.place(x=200, y=130)
 
         self.button3 = tk.Button(
             self, text='Clear Plot', command=self.clearCanvas)
