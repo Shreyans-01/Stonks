@@ -209,7 +209,7 @@ class StartPage(tk.Frame):
         self.controller = controller
 
         load = Image.open(
-            "/Users/onesh/OSTPL-MiniProject/stockanalyzer/assets/startBackground.jpeg")
+            "/OSTPL-MiniProject/stockanalyzer/assets/startBackground.jpeg")
         banner = ImageTk.PhotoImage(load)
         w = tk.Label(self, image=banner)
         w.image = banner
@@ -217,14 +217,14 @@ class StartPage(tk.Frame):
 
         # Start Button
         self.startImage = tk.PhotoImage(
-            file="/Users/onesh/OSTPL-MiniProject/stockanalyzer/assets/startButton.gif")
+            file="/OSTPL-MiniProject/stockanalyzer/assets/startButton.gif")
         button = tk.Button(self, image=self.startImage,
                            command=lambda: controller.show_frame("PageOne"))
         button.place(x=140, y=300)
 
         # Close Button
         self.closeImage = tk.PhotoImage(
-            file="/Users/onesh/OSTPL-MiniProject/stockanalyzer/assets/closeButton.gif")
+            file="/OSTPL-MiniProject/stockanalyzer/assets/closeButton.gif")
         close_button = Button(self, image=self.closeImage, command=self.quit)
         close_button.place(x=500, y=300)
 
@@ -236,7 +236,7 @@ class PageOne(tk.Frame):
         self.canvas = FigureCanvasTkAgg(self.f)
         self.canvas.get_tk_widget().place(x=30, y=200)
         img = PhotoImage(
-            file="/Users/onesh/OSTPL-MiniProject/stockanalyzer/assets/background.jpeg")
+            file="/OSTPL-MiniProject/stockanalyzer/assets/background.jpeg")
         canvas.create_image(20, 20, anchor=NW, image=img)
         self.canvas.draw()
 
@@ -246,7 +246,7 @@ class PageOne(tk.Frame):
 
         # Title Page of Page One
         load = Image.open(
-            "/Users/onesh/OSTPL-MiniProject/stockanalyzer/assets/background.jpeg")
+            "/OSTPL-MiniProject/stockanalyzer/assets/background.jpeg")
         new_image = load.resize((840, 100))
         banner = ImageTk.PhotoImage(new_image)
         w = tk.Label(self, image=banner)
@@ -255,7 +255,7 @@ class PageOne(tk.Frame):
 
         # calculate button
         self.button_Image = tk.PhotoImage(
-            file="/Users/onesh/OSTPL-MiniProject/stockanalyzer/assets/calculateButton.gif")
+            file="/OSTPL-MiniProject/stockanalyzer/assets/calculateButton.gif")
         button_calculate = tk.Button(
             self, text="Calculate", command=lambda: self.averageTesting(), width=10)
         button_calculate.place(x=140, y=220)
@@ -499,7 +499,7 @@ class PageTwo(PageOne):
         tk.Frame.__init__(self, parent)
         self.controller = controller
         load = Image.open(
-            "/Users/onesh/OSTPL-MiniProject/stockanalyzer/assets/graphBanner.gif")
+            "/OSTPL-MiniProject/stockanalyzer/assets/graphBanner.gif")
         banner = ImageTk.PhotoImage(load)
         w = tk.Label(self, image=banner)
         w.image = banner
@@ -538,11 +538,17 @@ class PageTwo(PageOne):
         if self.selectedValue() == 0:
             messagebox.showerror("Oops!", "Select how many days to graph")
         else:
-
+            day_num=30
             self.f = Figure(figsize=(4, 4), dpi=110)
             daysVar = self.days.get()
             plot1 = self.f.add_subplot(111)
-            self
+            df=pd.DataFrame(columns = ['Date', 'Open'])
+            print(data)
+            print(data['Date'][0])
+            for i in range(data.shape[0]-1-day_num,data.shape[0]-1):
+                new_row =pd.Series(data={'Date' : data['Date'][i],'Open': data['Open'][i]},name=i)
+                df=df.append(new_row)
+            plot1.plot(df['Date'],df['Open'],label="Open")
             # page_one = self.controller.get_page("PageOne")
             # open = page_one.average_open.get()
             # Open = data['Open'].tolist()
@@ -551,7 +557,6 @@ class PageTwo(PageOne):
             # close = data['Close'].tolist()
             # volume = data['Volume'].tolist()
             # date = data['Date'].tolist()
-            data.plot(x='Date', y='Open', style='b-', grid=True)
             self.createCanvas()
         # plt.show
         # self.objectY = page_one.get_Object()
@@ -651,7 +656,7 @@ class PageThree(PageOne):
         tk.Frame.__init__(self, parent)
         self.controller = controller
         load = Image.open(
-            "/Users/onesh/OSTPL-MiniProject/stockanalyzer/assets/graphBanner.gif")
+            "/OSTPL-MiniProject/stockanalyzer/assets/graphBanner.gif")
         banner = ImageTk.PhotoImage(load)
         w = tk.Label(self, image=banner)
         w.image = banner
