@@ -49,7 +49,7 @@ class Stock(object):
         global data
         total_sum = 0
         counter = 0
-        open_list = data['Open'].tolist()
+        open_list = data['open'].tolist()
         for item in open_list:
             total_sum += item
             counter += 1
@@ -64,7 +64,7 @@ class Stock(object):
     def average_high():
         total_sum = 0
         counter = 0
-        open_list = data['High'].tolist()
+        open_list = data['high'].tolist()
 
         for item in open_list:
             total_sum += item
@@ -75,7 +75,7 @@ class Stock(object):
     def average_low():
         total_sum = 0
         counter = 0
-        open_list = data['Low'].tolist()
+        open_list = data['low'].tolist()
         for item in open_list:
             total_sum += item
             counter += 1
@@ -85,7 +85,7 @@ class Stock(object):
     def average_close():
         total_sum = 0
         counter = 0
-        open_list = data['Close'].tolist()
+        open_list = data['close'].tolist()
 
         for item in open_list:
             total_sum += item
@@ -96,7 +96,7 @@ class Stock(object):
     def average_volume():
         total_sum = 0
         counter = 0
-        open_list = data['Volume'].tolist()
+        open_list = data['volume'].tolist()
         for item in open_list:
             total_sum += item
             counter += 1
@@ -205,7 +205,7 @@ class StartPage(tk.Frame):
         self.controller = controller
 
         load = Image.open(
-            "/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/startBackground.jpeg")
+            "/OSTPL-MiniProject/stockanalyzer/assets/startBackground.jpeg")
         banner = ImageTk.PhotoImage(load)
         w = tk.Label(self, image=banner)
         w.image = banner
@@ -213,14 +213,14 @@ class StartPage(tk.Frame):
 
         # Start Button
         self.startImage = tk.PhotoImage(
-            file="/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/startButton.gif")
+            file="/OSTPL-MiniProject/stockanalyzer/assets/startButton.gif")
         button = tk.Button(self, image=self.startImage,
                            command=lambda: controller.show_frame("PageOne"))
         button.place(x=140, y=300)
 
         # Close Button
         self.closeImage = tk.PhotoImage(
-            file="/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/closeButton.gif")
+            file="/OSTPL-MiniProject/stockanalyzer/assets/closeButton.gif")
         close_button = Button(self, image=self.closeImage, command=self.quit)
         close_button.place(x=500, y=300)
 
@@ -232,7 +232,7 @@ class PageOne(tk.Frame):
         self.canvas = FigureCanvasTkAgg(self.f)
         self.canvas.get_tk_widget().place(x=30, y=200)
         img = PhotoImage(
-            file="/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/background.jpeg")
+            file="/OSTPL-MiniProject/stockanalyzer/assets/background.jpeg")
         canvas.create_image(20, 20, anchor=NW, image=img)
         self.canvas.draw()
 
@@ -242,7 +242,7 @@ class PageOne(tk.Frame):
 
         # Title Page of Page One
         load = Image.open(
-            "/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/background.jpeg")
+            "/OSTPL-MiniProject/stockanalyzer/assets/background.jpeg")
         new_image = load.resize((840, 100))
         banner = ImageTk.PhotoImage(new_image)
         w = tk.Label(self, image=banner)
@@ -251,7 +251,7 @@ class PageOne(tk.Frame):
 
         # calculate button
         self.button_Image = tk.PhotoImage(
-            file="/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/calculateButton.gif")
+            file="/OSTPL-MiniProject/stockanalyzer/assets/calculateButton.gif")
         button_calculate = tk.Button(
             self, text="Calculate", command=lambda: self.averageTesting(),width=10)
         button_calculate.place(x=140, y=220)
@@ -358,23 +358,29 @@ class PageOne(tk.Frame):
     # Execute TicketSymbol and Average Calculation
     def something(self, event=None):
         global data
-        processing(data)
+        df1=pd.DataFrame(data)
+        processing(df1)
 
     def averageTesting(self, event=None):
         global data
         data = yf.download(tickers=self.tickerSymbol.get(),
                            period='3y', interval='1d')
+        data.reset_index(level=0, inplace=True)
+        # Change all column headings to be lower case, and remove spacing
+        data.columns = [str(x).lower().replace(' ', '_') for x in data.columns]
+        # Convert Date column to datetime
+        data.loc[:, 'date'] = pd.to_datetime(data['date'],format='%Y-%m-%d')
         # print(self.tickerSymbol.get())
         # processing(data)
         print(data)
         self.data=data
         data.reset_index(level=0, inplace=True)
         data.head()
-        fig = go.Figure(data=go.Ohlc(x=data['Date'],
-                                     open=data['Open'],
-                                     high=data['High'],
-                                     low=data['Low'],
-                                     close=data['Close']))
+        fig = go.Figure(data=go.Ohlc(x=data['date'],
+                                     open=data['open'],
+                                     high=data['high'],
+                                     low=data['low'],
+                                     close=data['close']))
         fig.show()
         if self.average_open.get() == 0 and self.average_high.get() == 0 and self.average_low.get() == 0 and \
                 self.average_close.get() == 0 and self.average_volume.get() == 0 and len(self.tickerSymbol.get()) == 0:
@@ -492,12 +498,13 @@ class PageOne(tk.Frame):
                     variable=self.average_volume).place(x=450, y=270)
 
 
+
 class PageTwo(PageOne):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
         load = Image.open(
-            "/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/graphBanner.gif")
+            "/OSTPL-MiniProject/stockanalyzer/assets/graphBanner.gif")
         banner = ImageTk.PhotoImage(load)
         w = tk.Label(self, image=banner)
         w.image = banner
@@ -526,6 +533,7 @@ class PageTwo(PageOne):
         self.selectionButtons()
 
     def print_it(self):
+        global data
         try:
             self.clearCanvas()
             self.canvas.get_tk_widget().destory()
@@ -535,51 +543,67 @@ class PageTwo(PageOne):
         if self.selectedValue() == 0:
             messagebox.showerror("Oops!", "Select how many days to graph")
         else:
-            self.f = Figure(figsize=(5, 5), dpi=110)
+            day_num=30
+            self.f = Figure(figsize=(4, 4), dpi=110)
             self.p = self.f.gca()
-
             daysVar = self.days.get()
-            page_one = self.controller.get_page("PageOne")
+            plot1 = self.f.add_subplot(111)
+            df=pd.DataFrame(columns = ['date', 'open','high','low','close','volume'])
+            print(data)
+            print(data['date'][0])
+            for i in range(data.shape[0]-1-day_num,data.shape[0]-1):
+                new_row =pd.Series(data={'date' : data['date'][i],'open': data['open'][i],'high': data['high'][i],'low': data['low'][i],'close': data['close'][i],'volume': data['volume'][i]},name=i)
+                df=df.append(new_row)
+            plot1.plot(df['date'],df['open'],label="Open")
+            plot1.plot(df['date'],df['high'],label="High")
+            plot1.plot(df['date'],df['low'],label="Low")
+            plot1.plot(df['date'],df['close'],label="Close")
+            plot1.axis('equal')
+            leg = plot1.legend()
+            # page_one = self.controller.get_page("PageOne")
             # open = page_one.average_open.get()
-            open = 102
-            high = page_one.average_high.get()
-            low = page_one.average_low.get()
-            close = page_one.average_close.get()
-            volume = page_one.average_volume.get()
+            # Open = data['Open'].tolist()
+            # high = data['High'].tolist()
+            # low = data['Low'].tolist()
+            # close = data['Close'].tolist()
+            # volume = data['Volume'].tolist()
+            # date = data['Date'].tolist()
+            self.createCanvas()
+        # plt.show
+        # self.objectY = page_one.get_Object()
+        # # print("PAGE TWO OBJECTY:", self.objectY)
 
-            self.objectY = page_one.get_Object()
-            # print("PAGE TWO OBJECTY:", self.objectY)
+        # pageTwo_cleanedUpList = convertToFloat(page_one.individual_list)
 
-            pageTwo_cleanedUpList = convertToFloat(page_one.individual_list)
+        # # Returns list and the length of the list in a tuple
+        # self.varOpen = Stock(self.objectY).pageTwo_Open(
+        #     daysVar, pageTwo_cleanedUpList)
+        # self.varHigh = Stock(self.objectY).pageTwo_High(
+        #     daysVar, pageTwo_cleanedUpList)
+        # self.varLow = Stock(self.objectY).pageTwo_Low(
+        #     daysVar, pageTwo_cleanedUpList)
+        # self.varClose = Stock(self.objectY).pageTwo_Close(
+        #     daysVar, pageTwo_cleanedUpList)
+        # self.varVolume = Stock(self.objectY).pageTwo_Volume(
+        #     daysVar, pageTwo_cleanedUpList)
 
-            # Returns list and the length of the list in a tuple
-            self.varOpen = Stock(self.objectY).pageTwo_Open(
-                daysVar, pageTwo_cleanedUpList)
-            self.varHigh = Stock(self.objectY).pageTwo_High(
-                daysVar, pageTwo_cleanedUpList)
-            self.varLow = Stock(self.objectY).pageTwo_Low(
-                daysVar, pageTwo_cleanedUpList)
-            self.varClose = Stock(self.objectY).pageTwo_Close(
-                daysVar, pageTwo_cleanedUpList)
-            self.varVolume = Stock(self.objectY).pageTwo_Volume(
-                daysVar, pageTwo_cleanedUpList)
+        # switches = [open, high, low, close, volume]
+        # options = [self.createOpen, self.createHigh,
+        #            self.createLow, self.createClose, self.createVolume]
+        # pageTwo_gotten = []
+        # for i, switch in enumerate(switches):
+        #     if switch:
+        #         # print("SWITCH:", switch, " at", i)
+        #         pageTwo_gotten.append(options[i])
+        #         # createCanvas(self.f)
+        # pageTwo_gotten.append(self.createCanvas)
+        # length = len(pageTwo_gotten)
 
-            switches = [open, high, low, close, volume]
-            options = [self.createOpen, self.createHigh,
-                       self.createLow, self.createClose, self.createVolume]
-            pageTwo_gotten = []
-            for i, switch in enumerate(switches):
-                if switch:
-                    # print("SWITCH:", switch, " at", i)
-                    pageTwo_gotten.append(options[i])
-                    # createCanvas(self.f)
-            pageTwo_gotten.append(self.createCanvas)
-            length = len(pageTwo_gotten)
-
-            for i in range(length):
-                pageTwo_gotten[i]()
+        # for i in range(length):
+        #     pageTwo_gotten[i]()
 
     # Create Canvas
+
     def createCanvas(self):
         self.canvas = FigureCanvasTkAgg(self.f)
         self.canvas.get_tk_widget().place(x=30, y=200)
@@ -636,6 +660,8 @@ class PageTwo(PageOne):
         self.daysVariable = int(self.days.get())
         print("You selected the option ", self.daysVariable)
         return self.daysVariable
+
+
 
 #===============================EXTERNAL FUNCTIONS=======================================================================#
 
