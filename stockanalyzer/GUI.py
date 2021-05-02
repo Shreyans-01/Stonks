@@ -18,7 +18,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 import numpy as np
 from tkinter import *
-from predict import *
+#from predict import *
 import sys
 import os
 import urllib.request
@@ -43,18 +43,16 @@ class Stock(object):
         self.name = name
 
     #response_file is after the file has been processed through process_file.
-    def average_open(self):
+    def average_open():
         global data
         total_sum = 0
         counter = 0
-        open_list = []
-        for item in data['Open']:
-            open_list.append(int(item))
+        open_list = data['Open'].tolist()
         for item in open_list:
             total_sum += item
             counter += 1
         average = total_sum / counter
-        print('Hi')
+        print('---------------------------------------------------------------------------------------')
         print(average)
         return average
 
@@ -224,7 +222,7 @@ class PageOne(tk.Frame):
     def canv(self):
         self.canvas = FigureCanvasTkAgg(self.f)
         self.canvas.get_tk_widget().place(x=30, y=200)
-        img=PhotoImage(file="/OSTPL-MiniProject/stockanalyzer/assets/background.jpeg")
+        img=PhotoImage(file="/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/background.jpeg")
         canvas.create_image(20,20,anchor=NW,image=img)
         self.canvas.draw()
 
@@ -241,7 +239,7 @@ class PageOne(tk.Frame):
         w.place(x=0, y=0)
 
         # calculate button
-        self.button_Image = tk.PhotoImage(file="/OSTPL-MiniProject/stockanalyzer/assets/calculateButton.gif")
+        self.button_Image = tk.PhotoImage(file="/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/calculateButton.gif")
         button_calculate = tk.Button(self,text="Calculate",command= lambda: self.averageTesting())
         button_calculate.place(x=140, y=220)
 
@@ -344,7 +342,7 @@ class PageOne(tk.Frame):
         global data
         data = yf.download(tickers=self.tickerSymbol.get(), period='3y', interval='1d')
         # print(self.tickerSymbol.get())
-        processing(data)
+        #processing(data)
         print(data)
         data.reset_index(level=0, inplace=True)
         data.head()
@@ -364,7 +362,7 @@ class PageOne(tk.Frame):
             self.individual_list = []
             self.objectX = create_stockInstance(self.tickerSymbol.get())
             get_Data(self.tickerSymbol.get(), self.objectX, self.individual_list)
-            self.cleanedUpList = self.cleanedUpList(self.individual_list)
+            #self.cleanedUpList = cleanedUpList(self.individual_list)
             self.average()
         
 
@@ -387,11 +385,10 @@ class PageOne(tk.Frame):
         try:
             self.destroy()
         except:
-            
             pass
 
-        # open = Stock(self.objectX).average_open(self.cleanedUpList)
-        open=data['Open']
+        #open = Stock(self.objectX).average_open()
+        open=Stock.average_open()
         # high = Stock(self.objectX).average_high(self.cleanedUpList)
         high=data['High']
         # low = Stock(self.objectX).average_low(self.cleanedUpList)
@@ -626,32 +623,14 @@ def create_stockInstance(tickerSymbol):
 
 def get_Data(returned, newInstance, new_list):
     if len(returned) > 0:
-        validate_file(returned, new_list)
+        validate_file(new_list)
     else:
         messagebox.showerror("Oops", "Enter a valid ticker symbol")
 
-def validate_file(ticker_symbol, new_list):
+def validate_file(new_list):
+    new_list=data
 
-#     while True:
-#         open_url = BASE_URL + ticker_symbol
-#         print(open_url)
-#         try:
-#             urllib.request.urlopen(open_url)
-#         except urllib.error.URLError as e:
-#             print("Oops! {}. Incorrect ticker symbol. Try again...".format(e))
-#             messagebox.showerror("Error", "Oops! {}. Incorrect ticker symbol. Try again...".format(e))
-#             break
-#         else:
-#             response_file = urllib.request.urlopen(BASE_URL + ticker_symbol)
-#             print(response_file)
-#             for row in response_file:
-#                 row = row.decode('utf-8')
-#                 row_split = row.split(',')
-#                 new_list.append(row_split)
-#             return new_list
-#         finally:
-#             break
- def cleanedUpList(individual_list):
+def cleanedUpList(individual_list):
     # Popping the Categories
     individual_list.pop(0)
     # Popping the Dates
