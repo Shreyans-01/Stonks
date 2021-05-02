@@ -541,8 +541,8 @@ class PageTwo(PageOne):
 
             self.f = Figure(figsize=(4, 4), dpi=110)
             daysVar = self.days.get()
-            self.f = data.plot(x='Date', y='Open', style='b-', grid=True)
-            # plot1 = self.f.add_subplot(111)
+            plot1 = self.f.add_subplot(111)
+            self
             # page_one = self.controller.get_page("PageOne")
             # open = page_one.average_open.get()
             # Open = data['Open'].tolist()
@@ -551,7 +551,7 @@ class PageTwo(PageOne):
             # close = data['Close'].tolist()
             # volume = data['Volume'].tolist()
             # date = data['Date'].tolist()
-
+            data.plot(x='Date', y='Open', style='b-', grid=True)
             self.createCanvas()
         # plt.show
         # self.objectY = page_one.get_Object()
