@@ -5,11 +5,14 @@ except ImportError:
     # Python3
     import tkinter as tk
 import matplotlib
+
 #Data Source
 import yfinance as yf
 
 #Data viz
 import plotly.graph_objs as go
+import matplotlib.pyplot as plt
+import pandas as pd
 matplotlib.use('TkAgg')
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
@@ -27,6 +30,7 @@ import tkinter.filedialog, tkinter.messagebox
 
 #================================STOCK CLASS===================================#
 # Constant(s)
+global data
 BASE_URL = "http://ichart.finance.yahoo.com/table.csv?s="
 # individual breaks the file into it's own list
 # individual_list[0] will give you the first row
@@ -38,19 +42,22 @@ class Stock(object):
         self.name = name
 
     #response_file is after the file has been processed through process_file.
-    def average_open(self, individual_list):
+    def average_open(self):
+        global data
         total_sum = 0
         counter = 0
         open_list = []
-        for item in individual_list:
-            open_list.append(item[0])
+        for item in data['Open']:
+            open_list.append(int(item))
         for item in open_list:
             total_sum += item
             counter += 1
         average = total_sum / counter
+        print('Hi')
+        print(average)
         return average
 
-    def average_high(self, individual_list):
+    def average_high(self):
         total_sum = 0
         counter = 0
         open_list = []
@@ -213,9 +220,16 @@ class StartPage(tk.Frame):
 
     #Calculation Page
 class PageOne(tk.Frame):
+    def canv(self):
+        self.canvas = FigureCanvasTkAgg(self.f)
+        self.canvas.get_tk_widget().place(x=30, y=200)
+        img=PhotoImage(file="/OSTPL-MiniProject/stockanalyzer/assets/background.jpeg")
+        canvas.create_image(20,20,anchor=NW,image=img)
+        self.canvas.draw()
+
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        self.controller = controller
+        self.controller = controller        
 
         # Title Page of Page One
         load = Image.open("/OSTPL-MiniProject/stockanalyzer/assets/background.jpeg")
@@ -227,7 +241,7 @@ class PageOne(tk.Frame):
 
         # calculate button
         self.button_Image = tk.PhotoImage(file="/OSTPL-MiniProject/stockanalyzer/assets/calculateButton.gif")
-        button_calculate = tk.Button(self, image=self.button_Image, command= lambda: self.averageTesting())
+        button_calculate = tk.Button(self,text="Calculate",command= lambda: self.averageTesting())
         button_calculate.place(x=140, y=220)
 
         # Second Page Graph Button
@@ -326,9 +340,30 @@ class PageOne(tk.Frame):
 
     # Execute TicketSymbol and Average Calculation
     def averageTesting(self, event=None):
-        data = yf.download(tickers=self.tickerSymbol.get(), period='10d', interval='5m')
+        global data
+        data = yf.download(tickers=self.tickerSymbol.get(), period='3y', interval='1d')
         # print(self.tickerSymbol.get())
         print(data)
+        data.reset_index(level=0, inplace=True)
+        data.head()
+        fig = go.Figure(data=go.Ohlc(x=data['Date'],
+                             open=data['Open'],
+                             high=data['High'],
+                             low=data['Low'],
+                             close=data['Close']))
+        fig.show()
+        if self.average_open.get() == 0 and self.average_high.get() == 0 and self.average_low.get() == 0 and \
+                        self.average_close.get() == 0 and self.average_volume.get() == 0 and len(self.tickerSymbol.get()) == 0:
+            messagebox.showerror("User Entry Error", "Insert a ticker symbol & check which you would like calculate")
+        elif self.average_open.get() == 0 and self.average_high.get() == 0 and self.average_low.get() == 0 and \
+                 self.average_close.get() == 0 and self.average_volume.get() == 0:
+            messagebox.showerror("Check Boxes Error", "Check which you would like to calculate")
+        else:
+            self.individual_list = []
+            self.objectX = create_stockInstance(self.tickerSymbol.get())
+            get_Data(self.tickerSymbol.get(), self.objectX, self.individual_list)
+            self.cleanedUpList = self.cleanedUpList(self.individual_list)
+            self.average()
         
 
     def get_Object(self):
@@ -352,11 +387,16 @@ class PageOne(tk.Frame):
         except:
             pass
 
-        open = Stock(self.objectX).average_open(self.cleanedUpList)
-        high = Stock(self.objectX).average_high(self.cleanedUpList)
-        low = Stock(self.objectX).average_low(self.cleanedUpList)
-        close = Stock(self.objectX).average_close(self.cleanedUpList)
-        volume = Stock(self.objectX).average_volume(self.cleanedUpList)
+        # open = Stock(self.objectX).average_open(self.cleanedUpList)
+        open=data['Open']
+        # high = Stock(self.objectX).average_high(self.cleanedUpList)
+        high=data['High']
+        # low = Stock(self.objectX).average_low(self.cleanedUpList)
+        low=data['Low']
+        # close = Stock(self.objectX).average_close(self.cleanedUpList)
+        close=data['Close']
+        # volume = Stock(self.objectX).average_volume(self.cleanedUpList)
+        volume=data['Volume']
 
         self.switches = [self.average_open.get(), self.average_high.get(), self.average_low.get(),
                     self.average_close.get(), self.average_volume.get()]
@@ -463,7 +503,8 @@ class PageTwo(PageOne):
 
             daysVar = self.days.get()
             page_one = self.controller.get_page("PageOne")
-            open = page_one.average_open.get()
+            # open = page_one.average_open.get()
+            open=102
             high = page_one.average_high.get()
             low = page_one.average_low.get()
             close = page_one.average_close.get()
@@ -499,7 +540,7 @@ class PageTwo(PageOne):
     def createCanvas(self):
         self.canvas = FigureCanvasTkAgg(self.f)
         self.canvas.get_tk_widget().place(x=30, y=200)
-        self.canvas.show()
+        self.canvas.draw()
 
     # Clear Canvas
     def clearCanvas(self):
@@ -587,27 +628,27 @@ def get_Data(returned, newInstance, new_list):
         messagebox.showerror("Oops", "Enter a valid ticker symbol")
 
 def validate_file(ticker_symbol, new_list):
-    while True:
-        open_url = BASE_URL + ticker_symbol
-        print(open_url)
-        try:
-            urllib.request.urlopen(open_url)
-        except urllib.error.URLError as e:
-            print("Oops! {}. Incorrect ticker symbol. Try again...".format(e))
-            messagebox.showerror("Error", "Oops! {}. Incorrect ticker symbol. Try again...".format(e))
-            break
-        else:
-            response_file = urllib.request.urlopen(BASE_URL + ticker_symbol)
-            print(response_file)
-            for row in response_file:
-                row = row.decode('utf-8')
-                row_split = row.split(',')
-                new_list.append(row_split)
-            return new_list
-        finally:
-            break
 
-def cleanedUpList(individual_list):
+#     while True:
+#         open_url = BASE_URL + ticker_symbol
+#         print(open_url)
+#         try:
+#             urllib.request.urlopen(open_url)
+#         except urllib.error.URLError as e:
+#             print("Oops! {}. Incorrect ticker symbol. Try again...".format(e))
+#             messagebox.showerror("Error", "Oops! {}. Incorrect ticker symbol. Try again...".format(e))
+#             break
+#         else:
+#             response_file = urllib.request.urlopen(BASE_URL + ticker_symbol)
+#             print(response_file)
+#             for row in response_file:
+#                 row = row.decode('utf-8')
+#                 row_split = row.split(',')
+#                 new_list.append(row_split)
+#             return new_list
+#         finally:
+#             break
+ def cleanedUpList(individual_list):
     # Popping the Categories
     individual_list.pop(0)
     # Popping the Dates
@@ -636,6 +677,7 @@ def restart():
 
 
 if __name__ == "__main__":
+    global root
     root = Page()
     root.geometry('850x850')
     root.title("STOCK V.1")
