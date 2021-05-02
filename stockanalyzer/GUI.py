@@ -176,7 +176,7 @@ class Page(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        for F in (StartPage, PageOne, PageTwo,PageThree):
+        for F in (StartPage, PageOne, PageTwo):
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
@@ -256,7 +256,7 @@ class PageOne(tk.Frame):
             self, text="Calculate", command=lambda: self.averageTesting(),width=10)
         button_calculate.place(x=140, y=220)
 
-        button_predict = tk.Button(self, text="Prediction",width=10,command=combine_funcs(lambda: controller.show_frame("PageThree"), self.clearLabels))
+        button_predict = tk.Button(self, text="Predict",width=10,command=combine_funcs(lambda: self.something()))
         button_predict.place(x=140, y=275)
 
         # Second Page Graph Button
@@ -356,6 +356,9 @@ class PageOne(tk.Frame):
         labelName.update_idletasks()
 
     # Execute TicketSymbol and Average Calculation
+    def something(self, event=None):
+        global data
+        processing(data)
 
     def averageTesting(self, event=None):
         global data
@@ -633,156 +636,6 @@ class PageTwo(PageOne):
         self.daysVariable = int(self.days.get())
         print("You selected the option ", self.daysVariable)
         return self.daysVariable
-
-
-class PageThree(PageOne):
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        self.controller = controller
-        load = Image.open(
-            "/Users/vishn/OSTPL-MiniProject/stockanalyzer/assets/graphBanner.gif")
-        banner = ImageTk.PhotoImage(load)
-        w = tk.Label(self, image=banner)
-        w.image = banner
-        w.place(x=0, y=0)
-
-        button_back = tk.Button(self, text="Restart",
-                                command=restart)
-        button_back.place(x=50, y=130)
-        self.button2 = tk.Button(
-            self, text='Print Graph', command=lambda: self.something())
-        self.button2.place(x=200, y=130)
-
-        self.button3 = tk.Button(
-            self, text='Clear Plot', command=self.clearCanvas)
-        self.button3.place(x=370, y=130)
-
-        self.button4 = tk.Button(self, text='Go Back', command=combine_funcs(
-            lambda: controller.show_frame("PageOne"), self.clearBack))
-        self.button4.place(x=550, y=130)
-
-        self.button5 = tk.Button(self, text='Close', command=self.quit)
-        self.button5.place(x=730, y=130)
-
-        # Display selection buttons
-        self.selectionButtons()
-
-    def something(self, event=None):
-        global data
-        processing(data)
-
-    def print_it(self):
-        try:
-            self.clearCanvas()
-            self.canvas.get_tk_widget().destory()
-        except:
-            pass
-
-        if self.selectedValue() == 0:
-            messagebox.showerror("Oops!", "Select how many days to graph")
-        else:
-            self.f = Figure(figsize=(5, 5), dpi=110)
-            self.p = self.f.gca()
-
-            daysVar = self.days.get()
-            page_one = self.controller.get_page("PageOne")
-            # open = page_one.average_open.get()
-            open = 102
-            high = page_one.average_high.get()
-            low = page_one.average_low.get()
-            close = page_one.average_close.get()
-            volume = page_one.average_volume.get()
-
-            self.objectY = page_one.get_Object()
-            # print("PAGE TWO OBJECTY:", self.objectY)
-
-            pageTwo_cleanedUpList = convertToFloat(page_one.individual_list)
-
-            # Returns list and the length of the list in a tuple
-            self.varOpen = Stock(self.objectY).pageTwo_Open(
-                daysVar, pageTwo_cleanedUpList)
-            self.varHigh = Stock(self.objectY).pageTwo_High(
-                daysVar, pageTwo_cleanedUpList)
-            self.varLow = Stock(self.objectY).pageTwo_Low(
-                daysVar, pageTwo_cleanedUpList)
-            self.varClose = Stock(self.objectY).pageTwo_Close(
-                daysVar, pageTwo_cleanedUpList)
-            self.varVolume = Stock(self.objectY).pageTwo_Volume(
-                daysVar, pageTwo_cleanedUpList)
-
-            switches = [open, high, low, close, volume]
-            options = [self.createOpen, self.createHigh,
-                       self.createLow, self.createClose, self.createVolume]
-            pageTwo_gotten = []
-            for i, switch in enumerate(switches):
-                if switch:
-                    # print("SWITCH:", switch, " at", i)
-                    pageTwo_gotten.append(options[i])
-                    # createCanvas(self.f)
-            pageTwo_gotten.append(self.createCanvas)
-            length = len(pageTwo_gotten)
-
-            for i in range(length):
-                pageTwo_gotten[i]()
-
-    # Create Canvas
-    def createCanvas(self):
-        self.canvas = FigureCanvasTkAgg(self.f)
-        self.canvas.get_tk_widget().place(x=30, y=200)
-        self.canvas.draw()
-
-    # Clear Canvas
-    def clearCanvas(self):
-        self.canvas.get_tk_widget().place_forget()
-        self.p.close()
-        page_one = self.controller.get_page("PageOne")
-        self.clear()
-        page_one.clear()
-
-    def clearBack(self):
-        self.days.set(0)
-        self.canvas.get_tk_widget().place_forget()
-        self.p.close()
-
-    def createOpen(self):
-        createHist_Variables(self.varOpen[0], self.varOpen[1], self.p, 'Open')
-
-    def createHigh(self):
-        createHist_Variables(self.varHigh[0], self.varHigh[1], self.p, 'High')
-
-    def createLow(self):
-        createHist_Variables(self.varLow[0], self.varLow[1], self.p, 'Low')
-
-    def createClose(self):
-        createHist_Variables(
-            self.varClose[0], self.varClose[1], self.p, 'Close')
-
-    def createVolume(self):
-        createHist_Variables(
-            self.varVolume[0], self.varVolume[1], self.p, 'Volume')
-
-    # selection buttons
-    def selectionButtons(self):
-        # Selection calculation list
-        self.days = IntVar()
-        self.selectionButton = tk.Label(
-            self, text="How many days would you like to graph?")
-        self.selectionButton.place(x=550, y=170)
-        self.button30 = Radiobutton(
-            self, text="1 Day", variable=self.days, value=30, command=self.selectedValue)
-        self.button30.place(x=610, y=190)
-        self.button60 = Radiobutton(
-            self, text="3 Days", variable=self.days, value=60, command=self.selectedValue)
-        self.button60.place(x=610, y=210)
-        self.button90 = Radiobutton(
-            self, text="7 Days", variable=self.days, value=90, command=self.selectedValue)
-        self.button90.place(x=610, y=230)
-
-    def selectedValue(self):
-        self.daysVariable = int(self.days.get())
-        print("You selected the option ", self.daysVariable)
-        return self.daysVariable
-
 
 #===============================EXTERNAL FUNCTIONS=======================================================================#
 
