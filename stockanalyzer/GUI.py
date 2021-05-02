@@ -9,13 +9,10 @@ try:
     import urllib.request
     import os
     import sys
-    import matplotlib.pyplot as plt
+
     import numpy as np
     from matplotlib.figure import Figure
     from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-
-    from matplotlib.backends.backend_tkagg import (
-        FigureCanvasTkAgg, NavigationToolbar2Tk)
     # Python2
     import tkinter as tk
 except ImportError:
@@ -31,7 +28,7 @@ import plotly.graph_objs as go
 import matplotlib.pyplot as plt
 import pandas as pd
 matplotlib.use('TkAgg')
-
+from predict import *
 
 #================================STOCK CLASS===================================#
 # Constant(s)
@@ -52,7 +49,7 @@ class Stock(object):
         global data
         total_sum = 0
         counter = 0
-        open_list = data['Open'].tolist()
+        open_list = data['open'].tolist()
         for item in open_list:
             total_sum += item
             counter += 1
@@ -60,15 +57,14 @@ class Stock(object):
         print('---------------------------------------------------------------------------------------')
         print(average)
         return average
-
+    
     def pred():
         global data
         return data
-
     def average_high():
         total_sum = 0
         counter = 0
-        open_list = data['High'].tolist()
+        open_list = data['high'].tolist()
 
         for item in open_list:
             total_sum += item
@@ -79,7 +75,7 @@ class Stock(object):
     def average_low():
         total_sum = 0
         counter = 0
-        open_list = data['Low'].tolist()
+        open_list = data['low'].tolist()
         for item in open_list:
             total_sum += item
             counter += 1
@@ -89,7 +85,7 @@ class Stock(object):
     def average_close():
         total_sum = 0
         counter = 0
-        open_list = data['Close'].tolist()
+        open_list = data['close'].tolist()
 
         for item in open_list:
             total_sum += item
@@ -100,7 +96,7 @@ class Stock(object):
     def average_volume():
         total_sum = 0
         counter = 0
-        open_list = data['Volume'].tolist()
+        open_list = data['volume'].tolist()
         for item in open_list:
             total_sum += item
             counter += 1
@@ -180,7 +176,7 @@ class Page(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        for F in (StartPage, PageOne, PageTwo, PageThree):
+        for F in (StartPage, PageOne, PageTwo):
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
@@ -257,11 +253,10 @@ class PageOne(tk.Frame):
         self.button_Image = tk.PhotoImage(
             file="/OSTPL-MiniProject/stockanalyzer/assets/calculateButton.gif")
         button_calculate = tk.Button(
-            self, text="Calculate", command=lambda: self.averageTesting(), width=10)
+            self, text="Calculate", command=lambda: self.averageTesting(),width=10)
         button_calculate.place(x=140, y=220)
 
-        button_predict = tk.Button(self, text="Prediction", width=10, command=combine_funcs(
-            lambda: controller.show_frame("PageThree"), self.clearLabels))
+        button_predict = tk.Button(self, text="Predict",width=10,command=combine_funcs(lambda: self.something()))
         button_predict.place(x=140, y=275)
 
         # Second Page Graph Button
@@ -361,22 +356,31 @@ class PageOne(tk.Frame):
         labelName.update_idletasks()
 
     # Execute TicketSymbol and Average Calculation
+    def something(self, event=None):
+        global data
+        df1=pd.DataFrame(data)
+        processing(df1)
 
     def averageTesting(self, event=None):
         global data
         data = yf.download(tickers=self.tickerSymbol.get(),
                            period='3y', interval='1d')
+        data.reset_index(level=0, inplace=True)
+        # Change all column headings to be lower case, and remove spacing
+        data.columns = [str(x).lower().replace(' ', '_') for x in data.columns]
+        # Convert Date column to datetime
+        data.loc[:, 'date'] = pd.to_datetime(data['date'],format='%Y-%m-%d')
         # print(self.tickerSymbol.get())
         # processing(data)
         print(data)
-        self.data = data
+        self.data=data
         data.reset_index(level=0, inplace=True)
         data.head()
-        fig = go.Figure(data=go.Ohlc(x=data['Date'],
-                                     open=data['Open'],
-                                     high=data['High'],
-                                     low=data['Low'],
-                                     close=data['Close']))
+        fig = go.Figure(data=go.Ohlc(x=data['date'],
+                                     open=data['open'],
+                                     high=data['high'],
+                                     low=data['low'],
+                                     close=data['close']))
         fig.show()
         if self.average_open.get() == 0 and self.average_high.get() == 0 and self.average_low.get() == 0 and \
                 self.average_close.get() == 0 and self.average_volume.get() == 0 and len(self.tickerSymbol.get()) == 0:
@@ -494,6 +498,7 @@ class PageOne(tk.Frame):
                     variable=self.average_volume).place(x=450, y=270)
 
 
+
 class PageTwo(PageOne):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -540,15 +545,21 @@ class PageTwo(PageOne):
         else:
             day_num=30
             self.f = Figure(figsize=(4, 4), dpi=110)
+            self.p = self.f.gca()
             daysVar = self.days.get()
             plot1 = self.f.add_subplot(111)
-            df=pd.DataFrame(columns = ['Date', 'Open'])
+            df=pd.DataFrame(columns = ['date', 'open','high','low','close','volume'])
             print(data)
-            print(data['Date'][0])
+            print(data['date'][0])
             for i in range(data.shape[0]-1-day_num,data.shape[0]-1):
-                new_row =pd.Series(data={'Date' : data['Date'][i],'Open': data['Open'][i]},name=i)
+                new_row =pd.Series(data={'date' : data['date'][i],'open': data['open'][i],'high': data['high'][i],'low': data['low'][i],'close': data['close'][i],'volume': data['volume'][i]},name=i)
                 df=df.append(new_row)
-            plot1.plot(df['Date'],df['Open'],label="Open")
+            plot1.plot(df['date'],df['open'],label="Open")
+            plot1.plot(df['date'],df['high'],label="High")
+            plot1.plot(df['date'],df['low'],label="Low")
+            plot1.plot(df['date'],df['close'],label="Close")
+            plot1.axis('equal')
+            leg = plot1.legend()
             # page_one = self.controller.get_page("PageOne")
             # open = page_one.average_open.get()
             # Open = data['Open'].tolist()
@@ -650,154 +661,6 @@ class PageTwo(PageOne):
         print("You selected the option ", self.daysVariable)
         return self.daysVariable
 
-
-class PageThree(PageOne):
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        self.controller = controller
-        load = Image.open(
-            "/OSTPL-MiniProject/stockanalyzer/assets/graphBanner.gif")
-        banner = ImageTk.PhotoImage(load)
-        w = tk.Label(self, image=banner)
-        w.image = banner
-        w.place(x=0, y=0)
-
-        button_back = tk.Button(self, text="Restart",
-                                command=restart)
-        button_back.place(x=50, y=130)
-        # self.button2 = tk.Button(
-        #     self, text='Print Graph', command=lambda: self.something())
-        # self.button2.place(x=200, y=130)
-
-        self.button3 = tk.Button(
-            self, text='Clear Plot', command=self.clearCanvas)
-        self.button3.place(x=370, y=130)
-
-        self.button4 = tk.Button(self, text='Go Back', command=combine_funcs(
-            lambda: controller.show_frame("PageOne"), self.clearBack))
-        self.button4.place(x=550, y=130)
-
-        self.button5 = tk.Button(self, text='Close', command=self.quit)
-        self.button5.place(x=730, y=130)
-
-        # Display selection buttons
-        self.selectionButtons()
-
-    def something(self, event=None):
-        global data
-        processing(data)
-
-    def print_it(self):
-        try:
-            self.clearCanvas()
-            self.canvas.get_tk_widget().destory()
-        except:
-            pass
-
-        if self.selectedValue() == 0:
-            messagebox.showerror("Oops!", "Select how many days to graph")
-        else:
-            self.f = Figure(figsize=(5, 5), dpi=110)
-            self.p = self.f.gca()
-
-            daysVar = self.days.get()
-            page_one = self.controller.get_page("PageOne")
-            # open = page_one.average_open.get()
-            open = 102
-            high = page_one.average_high.get()
-            low = page_one.average_low.get()
-            close = page_one.average_close.get()
-            volume = page_one.average_volume.get()
-
-            self.objectY = page_one.get_Object()
-            # print("PAGE TWO OBJECTY:", self.objectY)
-
-            pageTwo_cleanedUpList = convertToFloat(page_one.individual_list)
-
-            # Returns list and the length of the list in a tuple
-            self.varOpen = Stock(self.objectY).pageTwo_Open(
-                daysVar, pageTwo_cleanedUpList)
-            self.varHigh = Stock(self.objectY).pageTwo_High(
-                daysVar, pageTwo_cleanedUpList)
-            self.varLow = Stock(self.objectY).pageTwo_Low(
-                daysVar, pageTwo_cleanedUpList)
-            self.varClose = Stock(self.objectY).pageTwo_Close(
-                daysVar, pageTwo_cleanedUpList)
-            self.varVolume = Stock(self.objectY).pageTwo_Volume(
-                daysVar, pageTwo_cleanedUpList)
-
-            switches = [open, high, low, close, volume]
-            options = [self.createOpen, self.createHigh,
-                       self.createLow, self.createClose, self.createVolume]
-            pageTwo_gotten = []
-            for i, switch in enumerate(switches):
-                if switch:
-                    # print("SWITCH:", switch, " at", i)
-                    pageTwo_gotten.append(options[i])
-                    # createCanvas(self.f)
-            pageTwo_gotten.append(self.createCanvas)
-            length = len(pageTwo_gotten)
-
-            for i in range(length):
-                pageTwo_gotten[i]()
-
-    # Create Canvas
-    def createCanvas(self):
-        self.canvas = FigureCanvasTkAgg(self.f)
-        self.canvas.get_tk_widget().place(x=30, y=200)
-        self.canvas.draw()
-
-    # Clear Canvas
-    def clearCanvas(self):
-        self.canvas.get_tk_widget().place_forget()
-        self.p.close()
-        page_one = self.controller.get_page("PageOne")
-        self.clear()
-        page_one.clear()
-
-    def clearBack(self):
-        self.days.set(0)
-        self.canvas.get_tk_widget().place_forget()
-        self.p.close()
-
-    def createOpen(self):
-        createHist_Variables(self.varOpen[0], self.varOpen[1], self.p, 'Open')
-
-    def createHigh(self):
-        createHist_Variables(self.varHigh[0], self.varHigh[1], self.p, 'High')
-
-    def createLow(self):
-        createHist_Variables(self.varLow[0], self.varLow[1], self.p, 'Low')
-
-    def createClose(self):
-        createHist_Variables(
-            self.varClose[0], self.varClose[1], self.p, 'Close')
-
-    def createVolume(self):
-        createHist_Variables(
-            self.varVolume[0], self.varVolume[1], self.p, 'Volume')
-
-    # selection buttons
-    def selectionButtons(self):
-        # Selection calculation list
-        self.days = IntVar()
-        self.selectionButton = tk.Label(
-            self, text="How many days would you like to graph?")
-        self.selectionButton.place(x=550, y=170)
-        self.button30 = Radiobutton(
-            self, text="1 Day", variable=self.days, value=30, command=self.selectedValue)
-        self.button30.place(x=610, y=190)
-        self.button60 = Radiobutton(
-            self, text="3 Days", variable=self.days, value=60, command=self.selectedValue)
-        self.button60.place(x=610, y=210)
-        self.button90 = Radiobutton(
-            self, text="7 Days", variable=self.days, value=90, command=self.selectedValue)
-        self.button90.place(x=610, y=230)
-
-    def selectedValue(self):
-        self.daysVariable = int(self.days.get())
-        print("You selected the option ", self.daysVariable)
-        return self.daysVariable
 
 
 #===============================EXTERNAL FUNCTIONS=======================================================================#

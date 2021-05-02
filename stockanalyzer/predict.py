@@ -47,17 +47,11 @@ ticklabelsize = 14
 seed(101)
 tf.random.set_seed(model_seed)
 
-def processing(df):
-    df.reset_index(level=0, inplace=True)
-    # Change all column headings to be lower case, and remove spacing
-    df.columns = [str(x).lower().replace(' ', '_') for x in df.columns]
-    # Convert Date column to datetime
-    print(df)
-    df.loc[:, 'date'] = pd.to_datetime(df['date'],format='%Y-%m-%d')
-    # Change all column headings to be lower case, and remove spacing
-    df.columns = [str(x).lower().replace(' ', '_') for x in df.columns]
+def processing(data):
+    df=pd.DataFrame(data)
     dte=datetime.today()
-    new_row=pd.Series(data={'date': dte + timedelta(days=1),'open' : 0,'high': 0, 'low':0, 'close':0,'adj_close':0, 'volume':0},name='x')
+    new_row=pd.Series(data={'date': dte + timedelta(days=1),'open' : df['open'][df.shape[0]-1],'high': df['high'][df.shape[0]-1], 'low':df['low'][df.shape[0]-1], 'close':df['close'][df.shape[0]-1],'adj_close':df['adj_close'][df.shape[0]-1], 'volume':df['volume'][df.shape[0]-1]},name='1000')
+    df=df.append(new_row)
     # Get month of each sample
     df['month'] = df['date'].dt.month
     # Sort by datetime
@@ -115,7 +109,7 @@ def processing(df):
     ax.legend(['train', 'dev', 'test', 'predictions'])
     ax.set_xlabel("date")
     ax.set_ylabel("USD")
-    print(est_df['est']['x'])
+    print(est_df['est']['1000'])
 
 def get_mape(y_true, y_pred): 
     """
