@@ -32,7 +32,7 @@ cv_size = 0.2                  # proportion of dataset to be used as cross-valid
 N = 3                          # for feature at day t, we use lags from t-1, t-2, ..., t-N as features. 
                                # initial value before tuning
 lstm_units=128                  # lstm param. initial value before tuning.
-dropout_prob=0                 # lstm param. initial value before tuning.
+dropout_prob=0.1                 # lstm param. initial value before tuning.
 optimizer='nadam'               # lstm param. initial value before tuning.
 epochs=50                       # lstm param. initial value before tuning.
 batch_size=8                   # lstm param. initial value before tuning.
@@ -56,8 +56,8 @@ def processing(df):
     df.loc[:, 'date'] = pd.to_datetime(df['date'],format='%Y-%m-%d')
     # Change all column headings to be lower case, and remove spacing
     df.columns = [str(x).lower().replace(' ', '_') for x in df.columns]
-    new_row=pd.Series(data={'date': datetime.today() + timedelta(days=1),'open' : 0,'high': 0, 'low':0, 'close':0,'adj_close':0, 'volume':0},name='x')
-    df=df.append(new_row)
+    dte=datetime.today()
+    new_row=pd.Series(data={'date': dte + timedelta(days=1),'open' : 0,'high': 0, 'low':0, 'close':0,'adj_close':0, 'volume':0},name='x')
     # Get month of each sample
     df['month'] = df['date'].dt.month
     # Sort by datetime
@@ -115,7 +115,6 @@ def processing(df):
     ax.legend(['train', 'dev', 'test', 'predictions'])
     ax.set_xlabel("date")
     ax.set_ylabel("USD")
-
     print(est_df['est']['x'])
 
 def get_mape(y_true, y_pred): 
@@ -170,11 +169,11 @@ def train_pred_eval_model(x_train_scaled, \
                           y_cv, \
                           mu_cv_list, \
                           std_cv_list, \
-                          lstm_units=50, \
-                          dropout_prob=0.5, \
-                          optimizer='adam', \
-                          epochs=1, \
-                          batch_size=1):
+                          lstm_units=128, \
+                          dropout_prob=0.1, \
+                          optimizer='nadam', \
+                          epochs=50, \
+                          batch_size=8):
     '''
     Train model, do prediction, scale back to original range and do evaluation
     Use LSTM here.
