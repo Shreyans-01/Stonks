@@ -32,7 +32,7 @@ from predict import *
 
 #================================STOCK CLASS===================================#
 # Constant(s)
-global data,pred_val
+global data,pred_val,avg_open,avg_high,avg_low,avg_close
 BASE_URL = "http://ichart.finance.yahoo.com/table.csv?s="
 # individual breaks the file into it's own list
 # individual_list[0] will give you the first row
@@ -474,31 +474,32 @@ class PageOne(tk.Frame):
 
     # selection buttons
     def selectionButtons(self):
+        global avg_open,avg_close,avg_low,avg_high
         # Selection calculation list
         selectionButton = tk.Label(
             self, text="What would you like to calculate?")
         selectionButton.place(x=450, y=150)
         # average open check box
         self.average_open = IntVar()
-        Checkbutton(self, text="Average Open",
-                    variable=self.average_open).place(x=450, y=170)
+        Checkbutton(self, text="Average Open",variable=self.average_open).place(x=450, y=170)
+        avg_open=self.average_open
         # average high check box
         self.average_high = IntVar()
-        Checkbutton(self, text="Average High",
-                    variable=self.average_high).place(x=450, y=195)
+        Checkbutton(self, text="Average High",variable=self.average_high).place(x=450, y=195)
+        avg_high=self.average_high
         # average low check box
         self.average_low = IntVar()
-        Checkbutton(self, text="Average Low",
-                    variable=self.average_low).place(x=450, y=220)
+        Checkbutton(self, text="Average Low",variable=self.average_low).place(x=450, y=220)
+        avg_low=self.average_low
         # average close check box
         self.average_close = IntVar()
         Checkbutton(self, text="Average Close",
                     variable=self.average_close).place(x=450, y=245)
+        avg_close=self.average_close
         # average volume check box
         self.average_volume = IntVar()
         Checkbutton(self, text="Average Volume",
                     variable=self.average_volume).place(x=450, y=270)
-
 
 
 class PageTwo(PageOne):
@@ -535,7 +536,7 @@ class PageTwo(PageOne):
         self.selectionButtons()
 
     def print_it(self):
-        global data
+        global data,avg_open,avg_close,avg_high,avg_low
         try:
             self.clearCanvas()
             self.canvas.get_tk_widget().destory()
@@ -545,7 +546,6 @@ class PageTwo(PageOne):
         if self.selectedValue() == 0:
             messagebox.showerror("Oops!", "Select how many days to graph")
         else:
-            day_num=30
             self.f = Figure(figsize=(4, 4), dpi=110)
             self.p = self.f.gca()
             daysVar = self.days.get()
@@ -553,57 +553,22 @@ class PageTwo(PageOne):
             df=pd.DataFrame(columns = ['date', 'open','high','low','close','volume'])
             print(data)
             print(data['date'][0])
-            for i in range(data.shape[0]-1-day_num,data.shape[0]-1):
+            for i in range(data.shape[0]-1-daysVar,data.shape[0]-1):
                 new_row =pd.Series(data={'date' : data['date'][i],'open': data['open'][i],'high': data['high'][i],'low': data['low'][i],'close': data['close'][i],'volume': data['volume'][i]},name=i)
                 df=df.append(new_row)
-            plot1.plot(df['date'],df['open'],label="Open")
-            plot1.plot(df['date'],df['high'],label="High")
-            plot1.plot(df['date'],df['low'],label="Low")
-            plot1.plot(df['date'],df['close'],label="Close")
-            plot1.axis('equal')
+            if avg_open.get()==1:
+                plot1.plot(df['date'],df['open'],label="Open")
+            if avg_close.get()==1:
+                plot1.plot(df['date'],df['close'],label="Close")
+            if avg_high.get()==1:
+                plot1.plot(df['date'],df['high'],label="High")
+            if avg_low.get()==1:
+                plot1.plot(df['date'],df['low'],label="Low")
+           
             leg = plot1.legend()
-            # page_one = self.controller.get_page("PageOne")
-            # open = page_one.average_open.get()
-            # Open = data['Open'].tolist()
-            # high = data['High'].tolist()
-            # low = data['Low'].tolist()
-            # close = data['Close'].tolist()
-            # volume = data['Volume'].tolist()
-            # date = data['Date'].tolist()
+            
             self.createCanvas()
-        # plt.show
-        # self.objectY = page_one.get_Object()
-        # # print("PAGE TWO OBJECTY:", self.objectY)
-
-        # pageTwo_cleanedUpList = convertToFloat(page_one.individual_list)
-
-        # # Returns list and the length of the list in a tuple
-        # self.varOpen = Stock(self.objectY).pageTwo_Open(
-        #     daysVar, pageTwo_cleanedUpList)
-        # self.varHigh = Stock(self.objectY).pageTwo_High(
-        #     daysVar, pageTwo_cleanedUpList)
-        # self.varLow = Stock(self.objectY).pageTwo_Low(
-        #     daysVar, pageTwo_cleanedUpList)
-        # self.varClose = Stock(self.objectY).pageTwo_Close(
-        #     daysVar, pageTwo_cleanedUpList)
-        # self.varVolume = Stock(self.objectY).pageTwo_Volume(
-        #     daysVar, pageTwo_cleanedUpList)
-
-        # switches = [open, high, low, close, volume]
-        # options = [self.createOpen, self.createHigh,
-        #            self.createLow, self.createClose, self.createVolume]
-        # pageTwo_gotten = []
-        # for i, switch in enumerate(switches):
-        #     if switch:
-        #         # print("SWITCH:", switch, " at", i)
-        #         pageTwo_gotten.append(options[i])
-        #         # createCanvas(self.f)
-        # pageTwo_gotten.append(self.createCanvas)
-        # length = len(pageTwo_gotten)
-
-        # for i in range(length):
-        #     pageTwo_gotten[i]()
-
+        
     # Create Canvas
 
     def createCanvas(self):
