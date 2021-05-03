@@ -1,42 +1,34 @@
-try:
-    from tkinter import *
-    import tkinter.messagebox
-    import tkinter.filedialog
-    from PIL import ImageTk, Image
-    import requests
-    from tkinter import messagebox
-    import random
-    import urllib.request
-    import os
-    import sys
 
-    import numpy as np
-    from matplotlib.figure import Figure
-    from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-    # Python2
-    import tkinter as tk
-except ImportError:
-    # Python3
-    import tkinter as tk
+from predict import *
+from tkinter import *
+import tkinter.messagebox
+import tkinter.filedialog
+from PIL import ImageTk, Image
+import requests
+import urllib.request
+import os
+import sys
+
+import numpy as np
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+import tkinter as tk
+
 import matplotlib
 
 # Data Source
 import yfinance as yf
 
-# Data viz
+# For Plotting
 import plotly.graph_objs as go
 import matplotlib.pyplot as plt
 import pandas as pd
 matplotlib.use('TkAgg')
-from predict import *
 
-#================================STOCK CLASS===================================#
-# Constant(s)
-global data,pred_val,avg_open,avg_high,avg_low,avg_close
-BASE_URL = "http://ichart.finance.yahoo.com/table.csv?s="
-# individual breaks the file into it's own list
-# individual_list[0] will give you the first row
-# individual_list[0][0] will give you the first row first column attribute
+global data, pred_val, avg_open, avg_high, avg_low, avg_close
+
+# Stocks
 
 
 class Stock(object):
@@ -57,10 +49,11 @@ class Stock(object):
         print('---------------------------------------------------------------------------------------')
         print(average)
         return average
-    
+
     def pred():
         global data
         return data
+
     def average_high():
         total_sum = 0
         counter = 0
@@ -158,12 +151,9 @@ class Stock(object):
         return open_list, len(open_list)
 
 
-#===========================MAIN CLASS===================================#
+# Main
 LARGE_FONT = ("Verdana", 20)
 NORMAL_FONT = ("Helvetica", 16)
-BASE_URL = "http://ichart.finance.yahoo.com/table.csv?s="
-
-OBJECT_LIST = []
 
 
 class Page(tk.Tk):
@@ -205,19 +195,20 @@ class StartPage(tk.Frame):
         self.controller = controller
 
         load = Image.open(
-            "/OSTPL-MiniProject/stockanalyzer/assets/bg-startpage.jpg")
+            "/Users/onesh/OSTPL-MiniProject/stockanalyzer/assets/bg-startpage.jpg")
         banner = ImageTk.PhotoImage(load)
         w = tk.Label(self, image=banner)
         w.image = banner
         w.place(x=0, y=0, relwidth=1, relheight=1)
 
         # Start Button
-        button = tk.Button(self, text= "Start",
-                           command=lambda: controller.show_frame("PageOne"),width=10,font=('oswald',25,'bold'),bg='#ff7b00')
+        button = tk.Button(self, text="Start",
+                           command=lambda: controller.show_frame("PageOne"), width=10, font=('oswald', 25, 'bold'), bg='#ff7b00')
         button.place(x=160, y=300)
 
         # Close Button
-        close_button = Button(self, text = "Close", command=self.quit,width=10,font=('oswald',25,'bold'),bg='#D0EFFF')
+        close_button = Button(self, text="Close", command=self.quit, width=10, font=(
+            'oswald', 25, 'bold'), bg='#D0EFFF')
         close_button.place(x=520, y=300)
 
     # Calculation Page
@@ -228,7 +219,7 @@ class PageOne(tk.Frame):
         self.canvas = FigureCanvasTkAgg(self.f)
         self.canvas.get_tk_widget().place(x=30, y=200)
         img = PhotoImage(
-            file="/OSTPL-MiniProject/stockanalyzer/assets/bgstonks.jpg")
+            file="/Users/onesh/OSTPL-MiniProject/stockanalyzer/assets/bgstonks.jpg")
         canvas.create_image(20, 20, anchor=NW, image=img)
         self.canvas.draw()
 
@@ -238,7 +229,7 @@ class PageOne(tk.Frame):
 
         # Title Page of Page One
         load = Image.open(
-            "/OSTPL-MiniProject/stockanalyzer/assets/bgstonks.jpg")
+            "/Users/onesh/OSTPL-MiniProject/stockanalyzer/assets/bgstonks.jpg")
         new_image = load.resize((840, 200))
         banner = ImageTk.PhotoImage(new_image)
         w = tk.Label(self, image=banner)
@@ -247,12 +238,13 @@ class PageOne(tk.Frame):
 
         # calculate button
         self.button_Image = tk.PhotoImage(
-            file="/OSTPL-MiniProject/stockanalyzer/assets/calculateButton.gif")
+            file="/Users/onesh/OSTPL-MiniProject/stockanalyzer/assets/calculateButton.gif")
         button_calculate = tk.Button(
-            self, text="Calculate", command=lambda: self.averageTesting(),width=10)
+            self, text="Calculate", command=lambda: self.averageTesting(), width=10)
         button_calculate.place(x=140, y=320)
 
-        button_predict = tk.Button(self, text="Predict",width=10,command=combine_funcs(lambda: self.something()))
+        button_predict = tk.Button(
+            self, text="Predict", width=10, command=combine_funcs(lambda: self.something()))
         button_predict.place(x=140, y=375)
 
         # Second Page Graph Button
@@ -338,10 +330,13 @@ class PageOne(tk.Frame):
                 self.checkBoxes[i].set(0)
 
     def clearLabels(self):
-        length = len(self.switches)
-        for i in range(length):
-            self.newVarList[i].place_forget()
-            self.newTextList[i].set(" ")
+        try:
+            length = len(self.switches)
+            for i in range(length):
+                self.newVarList[i].place_forget()
+                self.newTextList[i].set(" ")
+        except:
+            pass
 
     def displayUpdate(self, varName, labelName):
         self.prompt.set("       Entered Ticker Symbol: " +
@@ -353,9 +348,9 @@ class PageOne(tk.Frame):
 
     # Execute TicketSymbol and Average Calculation
     def something(self, event=None):
-        global data,pred_val
-        df1=pd.DataFrame(data)
-        pred_val=processing(df1)
+        global data, pred_val
+        df1 = pd.DataFrame(data)
+        pred_val = processing(df1)
         self.average(1)
 
     def averageTesting(self, event=None):
@@ -366,14 +361,14 @@ class PageOne(tk.Frame):
         # Change all column headings to be lower case, and remove spacing
         data.columns = [str(x).lower().replace(' ', '_') for x in data.columns]
         # Convert Date column to datetime
-        data.loc[:, 'date'] = pd.to_datetime(data['date'],format='%Y-%m-%d')
+        data.loc[:, 'date'] = pd.to_datetime(data['date'], format='%Y-%m-%d')
         # print(self.tickerSymbol.get())
         # processing(data)
         print(data)
-        self.data=data
+        self.data = data
         data.reset_index(level=0, inplace=True)
         data.head()
-        
+
         if self.average_open.get() == 0 and self.average_high.get() == 0 and self.average_low.get() == 0 and \
                 self.average_close.get() == 0 and self.average_volume.get() == 0 and len(self.tickerSymbol.get()) == 0:
             messagebox.showerror(
@@ -383,16 +378,7 @@ class PageOne(tk.Frame):
             messagebox.showerror("Check Boxes Error",
                                  "Check which you would like to calculate")
         else:
-            self.individual_list = []
-            self.objectX = create_stockInstance(self.tickerSymbol.get())
-            get_Data(self.tickerSymbol.get(),
-                     self.objectX, self.individual_list)
-            #self.cleanedUpList = cleanedUpList(self.individual_list)
             self.average(0)
-
-    def get_Object(self):
-        #print("PAGE ONE SELF OBJECTX: ", self.objectX)
-        return self.objectX
 
     def label_Results(self):
         # label for Results
@@ -404,7 +390,7 @@ class PageOne(tk.Frame):
             labels.place_forget()
 
     # Calculating the average(s)
-    def average(self,n):
+    def average(self, n):
         global pred_val
         self.label_Results()
         try:
@@ -412,27 +398,22 @@ class PageOne(tk.Frame):
         except:
             pass
 
-        #open = Stock(self.objectX).average_open()
         open = Stock.average_open()
-        # high = Stock(self.objectX).average_high(self.cleanedUpList)
         high = Stock.average_high()
-        # low = Stock(self.objectX).average_low(self.cleanedUpList)
         low = Stock.average_low()
-        # close = Stock(self.objectX).average_close(self.cleanedUpList)
         close = Stock.average_close()
-        # volume = Stock(self.objectX).average_volume(self.cleanedUpList)
         volume = Stock.average_volume()
 
         self.switches = [self.average_open.get(), self.average_high.get(), self.average_low.get(),
-                         self.average_close.get(), self.average_volume.get(),n]
+                         self.average_close.get(), self.average_volume.get(), n]
         options = [("Open Average : ", (round(open, 5))), ("High Average : ", (round(high, 5))), ("Low Average : ", (round(low, 5))),
                    ("Close Average : ", (round(close, 5))), ("Volume Average : ", (round(volume, 5)))]
         gotten = []
         self.checkBoxes = [self.average_open, self.average_high, self.average_low,
                            self.average_close, self.average_volume]
         self.list_of_widgets = []
-        if n==1:
-            options.append(("Next Day Prediction : ",(round(pred_val,5))))
+        if n == 1:
+            options.append(("Next Day Prediction : ", (round(pred_val, 5))))
         for k, option in enumerate(options):
             if self.switches[k]:
                 gotten.append(option)
@@ -465,28 +446,31 @@ class PageOne(tk.Frame):
 
     # selection buttons
     def selectionButtons(self):
-        global avg_open,avg_close,avg_low,avg_high
+        global avg_open, avg_close, avg_low, avg_high
         # Selection calculation list
         selectionButton = tk.Label(
             self, text="What would you like to calculate?")
         selectionButton.place(x=450, y=250)
         # average open check box
         self.average_open = IntVar()
-        Checkbutton(self, text="Average Open",variable=self.average_open).place(x=450, y=270)
-        avg_open=self.average_open
+        Checkbutton(self, text="Average Open",
+                    variable=self.average_open).place(x=450, y=270)
+        avg_open = self.average_open
         # average high check box
         self.average_high = IntVar()
-        Checkbutton(self, text="Average High",variable=self.average_high).place(x=450, y=295)
-        avg_high=self.average_high
+        Checkbutton(self, text="Average High",
+                    variable=self.average_high).place(x=450, y=295)
+        avg_high = self.average_high
         # average low check box
         self.average_low = IntVar()
-        Checkbutton(self, text="Average Low",variable=self.average_low).place(x=450, y=320)
-        avg_low=self.average_low
+        Checkbutton(self, text="Average Low",
+                    variable=self.average_low).place(x=450, y=320)
+        avg_low = self.average_low
         # average close check box
         self.average_close = IntVar()
         Checkbutton(self, text="Average Close",
                     variable=self.average_close).place(x=450, y=345)
-        avg_close=self.average_close
+        avg_close = self.average_close
         # average volume check box
         self.average_volume = IntVar()
         Checkbutton(self, text="Average Volume",
@@ -498,7 +482,7 @@ class PageTwo(PageOne):
         tk.Frame.__init__(self, parent)
         self.controller = controller
         load = Image.open(
-            "/OSTPL-MiniProject/stockanalyzer/assets/graphbg.png")
+            "/Users/onesh/OSTPL-MiniProject/stockanalyzer/assets/graphbg.png")
         banner = ImageTk.PhotoImage(load)
         new_image1 = load.resize((840, 200))
         banner = ImageTk.PhotoImage(new_image1)
@@ -524,11 +508,13 @@ class PageTwo(PageOne):
         self.button5 = tk.Button(self, text='Close', command=self.quit)
         self.button5.place(x=730, y=230)
 
-        self.button6 = tk.Button(self, text="Detailed Graph",width=10,command=lambda:self.detailed_graph())
+        self.button6 = tk.Button(
+            self, text="Detailed Graph", width=10, command=lambda: self.detailed_graph())
         self.button6.place(x=400, y=810)
 
         # Display selection buttons
         self.selectionButtons()
+
     def detailed_graph(self):
         global data
         fig = go.Figure(data=go.Ohlc(x=data['date'],
@@ -539,7 +525,7 @@ class PageTwo(PageOne):
         fig.show()
 
     def print_it(self):
-        global data,avg_open,avg_close,avg_high,avg_low
+        global data, avg_open, avg_close, avg_high, avg_low
         try:
             self.clearCanvas()
             self.canvas.get_tk_widget().destory()
@@ -553,25 +539,27 @@ class PageTwo(PageOne):
             self.p = self.f.gca()
             daysVar = self.days.get()
             plot1 = self.f.add_subplot(111)
-            df=pd.DataFrame(columns = ['date', 'open','high','low','close','volume'])
+            df = pd.DataFrame(
+                columns=['date', 'open', 'high', 'low', 'close', 'volume'])
             print(data)
             print(data['date'][0])
-            for i in range(data.shape[0]-1-daysVar,data.shape[0]-1):
-                new_row =pd.Series(data={'date' : data['date'][i],'open': data['open'][i],'high': data['high'][i],'low': data['low'][i],'close': data['close'][i],'volume': data['volume'][i]},name=i)
-                df=df.append(new_row)
-            if avg_open.get()==1:
-                plot1.plot(df['date'],df['open'],label="Open")
-            if avg_close.get()==1:
-                plot1.plot(df['date'],df['close'],label="Close")
-            if avg_high.get()==1:
-                plot1.plot(df['date'],df['high'],label="High")
-            if avg_low.get()==1:
-                plot1.plot(df['date'],df['low'],label="Low")
-           
+            for i in range(data.shape[0]-1-daysVar, data.shape[0]-1):
+                new_row = pd.Series(data={'date': data['date'][i], 'open': data['open'][i], 'high': data['high']
+                                          [i], 'low': data['low'][i], 'close': data['close'][i], 'volume': data['volume'][i]}, name=i)
+                df = df.append(new_row)
+            if avg_open.get() == 1:
+                plot1.plot(df['date'], df['open'], label="Open")
+            if avg_close.get() == 1:
+                plot1.plot(df['date'], df['close'], label="Close")
+            if avg_high.get() == 1:
+                plot1.plot(df['date'], df['high'], label="High")
+            if avg_low.get() == 1:
+                plot1.plot(df['date'], df['low'], label="Low")
+
             leg = plot1.legend()
-            
+
             self.createCanvas()
-        
+
     # Create Canvas
 
     def createCanvas(self):
@@ -592,24 +580,8 @@ class PageTwo(PageOne):
         self.canvas.get_tk_widget().place_forget()
         self.p.close()
 
-    def createOpen(self):
-        createHist_Variables(self.varOpen[0], self.varOpen[1], self.p, 'Open')
-
-    def createHigh(self):
-        createHist_Variables(self.varHigh[0], self.varHigh[1], self.p, 'High')
-
-    def createLow(self):
-        createHist_Variables(self.varLow[0], self.varLow[1], self.p, 'Low')
-
-    def createClose(self):
-        createHist_Variables(
-            self.varClose[0], self.varClose[1], self.p, 'Close')
-
-    def createVolume(self):
-        createHist_Variables(
-            self.varVolume[0], self.varVolume[1], self.p, 'Volume')
-
     # selection buttons
+
     def selectionButtons(self):
         # Selection calculation list
         self.days = IntVar()
@@ -632,32 +604,7 @@ class PageTwo(PageOne):
         return self.daysVariable
 
 
-
-#===============================EXTERNAL FUNCTIONS=======================================================================#
-
-
-def createHist_Variables(histoList, lengthLength, p, histoLabel):
-    histoList = histoList
-    lengthList = lengthLength
-    meanHistoList = np.mean(histoList)
-    createHistogram(p, histoList, lengthList, meanHistoList, histoLabel)
-
-
-def createHistogram(p, histoList, lengthList, meanHistoList, histoLabel):
-    colorHistoList = ['red', 'blue', 'green', 'cyan', 'magenta', 'yellow', 'teal', 'orange', 'maroon', 'coral', 'cyan',
-                      'orchid', 'lightpink', 'steelblue', 'midnightblue', 'gold', 'darkred', 'saddlebrown', 'black',
-                      'dimgrey', 'peru']
-    averageColorList = ['gold', 'darkred', 'saddlebrown', 'black', 'dimgrey', 'peru', 'aliceblue', 'yellowgreen',
-                        'skyblue', 'darkblue', 'indigo']
-
-    p.hist(histoList, color=random.choice(colorHistoList), alpha=0.75, histtype='stepfilled',
-           label=histoLabel)
-    # average line
-    p.axvline(meanHistoList, color=random.choice(
-        averageColorList), linewidth=2)
-    p.set_xlabel('Daily', fontsize=15)
-    p.set_ylabel('Frequency', fontsize=15)
-    p.legend(loc='upper right')
+# External Functions
 
 
 def return_TickerSymbol(tickerSymbol):
