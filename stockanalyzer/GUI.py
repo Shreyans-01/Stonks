@@ -205,24 +205,20 @@ class StartPage(tk.Frame):
         self.controller = controller
 
         load = Image.open(
-            "/OSTPL-MiniProject/stockanalyzer/assets/startBackground.jpeg")
+            "/OSTPL-MiniProject/stockanalyzer/assets/bg-startpage.jpg")
         banner = ImageTk.PhotoImage(load)
         w = tk.Label(self, image=banner)
         w.image = banner
         w.place(x=0, y=0, relwidth=1, relheight=1)
 
         # Start Button
-        self.startImage = tk.PhotoImage(
-            file="/OSTPL-MiniProject/stockanalyzer/assets/startButton.gif")
-        button = tk.Button(self, image=self.startImage,
-                           command=lambda: controller.show_frame("PageOne"))
-        button.place(x=140, y=300)
+        button = tk.Button(self, text= "Start",
+                           command=lambda: controller.show_frame("PageOne"),width=10,font=('oswald',25,'bold'),bg='#ff7b00')
+        button.place(x=160, y=300)
 
         # Close Button
-        self.closeImage = tk.PhotoImage(
-            file="/OSTPL-MiniProject/stockanalyzer/assets/closeButton.gif")
-        close_button = Button(self, image=self.closeImage, command=self.quit)
-        close_button.place(x=500, y=300)
+        close_button = Button(self, text = "Close", command=self.quit,width=10,font=('oswald',25,'bold'),bg='#D0EFFF')
+        close_button.place(x=520, y=300)
 
     # Calculation Page
 
@@ -232,7 +228,7 @@ class PageOne(tk.Frame):
         self.canvas = FigureCanvasTkAgg(self.f)
         self.canvas.get_tk_widget().place(x=30, y=200)
         img = PhotoImage(
-            file="/OSTPL-MiniProject/stockanalyzer/assets/background.jpeg")
+            file="/OSTPL-MiniProject/stockanalyzer/assets/bgstonks.jpg")
         canvas.create_image(20, 20, anchor=NW, image=img)
         self.canvas.draw()
 
@@ -242,8 +238,8 @@ class PageOne(tk.Frame):
 
         # Title Page of Page One
         load = Image.open(
-            "/OSTPL-MiniProject/stockanalyzer/assets/background.jpeg")
-        new_image = load.resize((840, 100))
+            "/OSTPL-MiniProject/stockanalyzer/assets/bgstonks.jpg")
+        new_image = load.resize((840, 200))
         banner = ImageTk.PhotoImage(new_image)
         w = tk.Label(self, image=banner)
         w.image = banner
@@ -254,48 +250,48 @@ class PageOne(tk.Frame):
             file="/OSTPL-MiniProject/stockanalyzer/assets/calculateButton.gif")
         button_calculate = tk.Button(
             self, text="Calculate", command=lambda: self.averageTesting(),width=10)
-        button_calculate.place(x=140, y=220)
+        button_calculate.place(x=140, y=320)
 
         button_predict = tk.Button(self, text="Predict",width=10,command=combine_funcs(lambda: self.something()))
-        button_predict.place(x=140, y=275)
+        button_predict.place(x=140, y=375)
 
         # Second Page Graph Button
         # self.graph_Image = tk.PhotoImage(file="/Users/LinPeng/PycharmProjects/StockPrediction/graphButton.gif")
         button_graph = tk.Button(self,  text="Graph", command=combine_funcs(
             lambda: controller.show_frame("PageTwo"), self.clearLabels))
-        button_graph.place(x=100, y=370)
+        button_graph.place(x=100, y=470)
 
         # Clear Button
         # self.clear_Image = tk.PhotoImage(file="/Users/LinPeng/PycharmProjects/StockPrediction/clearButton.gif")
         clear_button = tk.Button(self,  text="Clear",
                                  command=self.initialClear)
-        clear_button.place(x=250, y=370)
+        clear_button.place(x=250, y=470)
 
         # Restart Button
         # self.restart_Image = tk.PhotoImage(file="/Users/LinPeng/PycharmProjects/StockPrediction/restartButton.gif")
         restart_button = tk.Button(self, text="Restart", command=restart)
-        restart_button.place(x=370, y=370)
+        restart_button.place(x=370, y=470)
 
         # Back to Start button
         # self.back_Image = tk.PhotoImage(file="/Users/LinPeng/PycharmProjects/StockPrediction/back80Button.gif")
         button_back = tk.Button(self,  text="Back",
                                 command=combine_funcs(lambda: controller.show_frame("StartPage"), self.clear))
-        button_back.place(x=510, y=370)
+        button_back.place(x=510, y=470)
 
         # close Button
         close_button = tk.Button(self, text="Close", command=self.quit)
-        close_button.place(x=650, y=370)
+        close_button.place(x=650, y=470)
 
         # Label Ticker Symbol Input from user
         self.user_input_tickerSymbol = tk.Label(
             self, text="Enter Ticker Symbol: ")
-        self.user_input_tickerSymbol.place(x=60, y=150)
+        self.user_input_tickerSymbol.place(x=60, y=250)
 
         # Ticker Symbol Input from user
         self.tickerSymbol = StringVar()
         self.entry_tickerSymbol = tk.Entry(
             self, textvariable=self.tickerSymbol)
-        self.entry_tickerSymbol.place(x=200, y=150, width=100)
+        self.entry_tickerSymbol.place(x=200, y=250, width=100)
 
         # Display the check boxes
         self.selectionButtons()
@@ -305,7 +301,7 @@ class PageOne(tk.Frame):
         self.prompt = StringVar()
         self.prompt.set('')
         self.label1 = tk.Label(self, textvariable=self.prompt)
-        self.label1.place(x=330, y=530)
+        self.label1.place(x=330, y=630)
 
     def delete_TickerSymbolEntry(self):
         self.entry_tickerSymbol.delete(0, END)
@@ -348,7 +344,7 @@ class PageOne(tk.Frame):
             self.newTextList[i].set(" ")
 
     def displayUpdate(self, varName, labelName):
-        self.prompt.set("Entered Ticker Symbol: " +
+        self.prompt.set("       Entered Ticker Symbol: " +
                         self.tickerSymbol.get().upper())
         self.label1.update_idletasks()
 
@@ -401,7 +397,7 @@ class PageOne(tk.Frame):
     def label_Results(self):
         # label for Results
         self.resultMsg = tk.Label(self, text="RESULTS", font=LARGE_FONT)
-        self.resultMsg.place(x=425, y=500, anchor="center")
+        self.resultMsg.place(x=425, y=600, anchor="center")
 
     def destroy(self):
         for labels in self.newVarList:
@@ -460,7 +456,7 @@ class PageOne(tk.Frame):
             self.newTextList[i].set('')
             self.newVarList.append(tk.Label(textvariable=self.newTextList[i]))
             self.newVarList[i].place(
-                x=420, y=550+self.placementValue, anchor="center")
+                x=420, y=650+self.placementValue, anchor="center")
             self.displayUpdate(self.newTextList[i], self.newVarList[i])
             i += 1
             self.placementValue += 25
@@ -473,28 +469,28 @@ class PageOne(tk.Frame):
         # Selection calculation list
         selectionButton = tk.Label(
             self, text="What would you like to calculate?")
-        selectionButton.place(x=450, y=150)
+        selectionButton.place(x=450, y=250)
         # average open check box
         self.average_open = IntVar()
-        Checkbutton(self, text="Average Open",variable=self.average_open).place(x=450, y=170)
+        Checkbutton(self, text="Average Open",variable=self.average_open).place(x=450, y=270)
         avg_open=self.average_open
         # average high check box
         self.average_high = IntVar()
-        Checkbutton(self, text="Average High",variable=self.average_high).place(x=450, y=195)
+        Checkbutton(self, text="Average High",variable=self.average_high).place(x=450, y=295)
         avg_high=self.average_high
         # average low check box
         self.average_low = IntVar()
-        Checkbutton(self, text="Average Low",variable=self.average_low).place(x=450, y=220)
+        Checkbutton(self, text="Average Low",variable=self.average_low).place(x=450, y=320)
         avg_low=self.average_low
         # average close check box
         self.average_close = IntVar()
         Checkbutton(self, text="Average Close",
-                    variable=self.average_close).place(x=450, y=245)
+                    variable=self.average_close).place(x=450, y=345)
         avg_close=self.average_close
         # average volume check box
         self.average_volume = IntVar()
         Checkbutton(self, text="Average Volume",
-                    variable=self.average_volume).place(x=450, y=270)
+                    variable=self.average_volume).place(x=450, y=370)
 
 
 class PageTwo(PageOne):
@@ -502,33 +498,34 @@ class PageTwo(PageOne):
         tk.Frame.__init__(self, parent)
         self.controller = controller
         load = Image.open(
-            "/OSTPL-MiniProject/stockanalyzer/assets/graphBanner.gif")
+            "/OSTPL-MiniProject/stockanalyzer/assets/graphbg.png")
         banner = ImageTk.PhotoImage(load)
+        new_image1 = load.resize((840, 200))
+        banner = ImageTk.PhotoImage(new_image1)
         w = tk.Label(self, image=banner)
         w.image = banner
         w.place(x=0, y=0)
-
         button_back = tk.Button(self, text="Restart",
                                 command=restart)
-        button_back.place(x=50, y=130)
+        button_back.place(x=50, y=230)
 
         self.button2 = tk.Button(
             self, text='Print Graph', command=self.print_it)
-        self.button2.place(x=200, y=130)
+        self.button2.place(x=200, y=230)
 
         self.button3 = tk.Button(
             self, text='Clear Plot', command=self.clearCanvas)
-        self.button3.place(x=370, y=130)
+        self.button3.place(x=370, y=230)
 
         self.button4 = tk.Button(self, text='Go Back', command=combine_funcs(
             lambda: controller.show_frame("PageOne"), self.clearBack))
-        self.button4.place(x=550, y=130)
+        self.button4.place(x=550, y=230)
 
         self.button5 = tk.Button(self, text='Close', command=self.quit)
-        self.button5.place(x=730, y=130)
+        self.button5.place(x=730, y=230)
 
         self.button6 = tk.Button(self, text="Detailed Graph",width=10,command=lambda:self.detailed_graph())
-        self.button6.place(x=400, y=750)
+        self.button6.place(x=400, y=810)
 
         # Display selection buttons
         self.selectionButtons()
@@ -552,7 +549,7 @@ class PageTwo(PageOne):
         if self.selectedValue() == 0:
             messagebox.showerror("Oops!", "Select how many days to graph")
         else:
-            self.f = Figure(figsize=(7, 4), dpi=110)
+            self.f = Figure(figsize=(9, 4), dpi=110)
             self.p = self.f.gca()
             daysVar = self.days.get()
             plot1 = self.f.add_subplot(111)
@@ -579,7 +576,7 @@ class PageTwo(PageOne):
 
     def createCanvas(self):
         self.canvas = FigureCanvasTkAgg(self.f)
-        self.canvas.get_tk_widget().place(x=30, y=275)
+        self.canvas.get_tk_widget().place(x=-70, y=360)
         self.canvas.draw()
 
     # Clear Canvas
@@ -618,16 +615,16 @@ class PageTwo(PageOne):
         self.days = IntVar()
         self.selectionButton = tk.Label(
             self, text="How many days would you like to graph?")
-        self.selectionButton.place(x=550, y=170)
+        self.selectionButton.place(x=550, y=270)
         self.button30 = Radiobutton(
             self, text="30 Days", variable=self.days, value=30, command=self.selectedValue)
-        self.button30.place(x=610, y=190)
+        self.button30.place(x=610, y=290)
         self.button60 = Radiobutton(
             self, text="60 Days", variable=self.days, value=60, command=self.selectedValue)
-        self.button60.place(x=610, y=210)
+        self.button60.place(x=610, y=310)
         self.button90 = Radiobutton(
             self, text="90 Days", variable=self.days, value=90, command=self.selectedValue)
-        self.button90.place(x=610, y=230)
+        self.button90.place(x=610, y=330)
 
     def selectedValue(self):
         self.daysVariable = int(self.days.get())
@@ -723,5 +720,5 @@ if __name__ == "__main__":
     global root
     root = Page()
     root.geometry('850x850')
-    root.title("STOCK V.1")
+    root.title("STONKS V.1")
     root.mainloop()
