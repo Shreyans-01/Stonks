@@ -110,6 +110,7 @@ def processing(data):
     ax.set_xlabel("date")
     ax.set_ylabel("USD")
     print(est_df['est']['1000'])
+    return float(est_df['est']['1000'])
 
 def get_mape(y_true, y_pred): 
     """

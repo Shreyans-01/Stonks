@@ -32,7 +32,7 @@ from predict import *
 
 #================================STOCK CLASS===================================#
 # Constant(s)
-global data
+global data,pred_val
 BASE_URL = "http://ichart.finance.yahoo.com/table.csv?s="
 # individual breaks the file into it's own list
 # individual_list[0] will give you the first row
@@ -357,9 +357,10 @@ class PageOne(tk.Frame):
 
     # Execute TicketSymbol and Average Calculation
     def something(self, event=None):
-        global data
+        global data,pred_val
         df1=pd.DataFrame(data)
-        processing(df1)
+        pred_val=processing(df1)
+        self.average(1)
 
     def averageTesting(self, event=None):
         global data
@@ -396,7 +397,7 @@ class PageOne(tk.Frame):
             get_Data(self.tickerSymbol.get(),
                      self.objectX, self.individual_list)
             #self.cleanedUpList = cleanedUpList(self.individual_list)
-            self.average()
+            self.average(0)
 
     def get_Object(self):
         #print("PAGE ONE SELF OBJECTX: ", self.objectX)
@@ -412,7 +413,8 @@ class PageOne(tk.Frame):
             labels.place_forget()
 
     # Calculating the average(s)
-    def average(self):
+    def average(self,n):
+        global pred_val
         self.label_Results()
         try:
             self.destroy()
@@ -431,18 +433,18 @@ class PageOne(tk.Frame):
         volume = Stock.average_volume()
 
         self.switches = [self.average_open.get(), self.average_high.get(), self.average_low.get(),
-                         self.average_close.get(), self.average_volume.get()]
-        options = [("Open Average:", (round(open, 5))), ("High Average:", (round(high, 5))), ("Low Average:", (round(low, 5))),
-                   ("Close Average:", (round(close, 5))), ("Volume Average:", (round(volume, 5)))]
+                         self.average_close.get(), self.average_volume.get(),n]
+        options = [("Open Average : ", (round(open, 5))), ("High Average : ", (round(high, 5))), ("Low Average : ", (round(low, 5))),
+                   ("Close Average : ", (round(close, 5))), ("Volume Average : ", (round(volume, 5)))]
         gotten = []
         self.checkBoxes = [self.average_open, self.average_high, self.average_low,
                            self.average_close, self.average_volume]
         self.list_of_widgets = []
-
+        if n==1:
+            options.append(("Next Day Prediction : ",(round(pred_val,5))))
         for k, option in enumerate(options):
             if self.switches[k]:
                 gotten.append(option)
-
         self.newVarList = []
         self.newTextList = []
         self.cleanedText = " "
