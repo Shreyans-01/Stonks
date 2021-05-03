@@ -377,12 +377,7 @@ class PageOne(tk.Frame):
         self.data=data
         data.reset_index(level=0, inplace=True)
         data.head()
-        fig = go.Figure(data=go.Ohlc(x=data['date'],
-                                     open=data['open'],
-                                     high=data['high'],
-                                     low=data['low'],
-                                     close=data['close']))
-        fig.show()
+        
         if self.average_open.get() == 0 and self.average_high.get() == 0 and self.average_low.get() == 0 and \
                 self.average_close.get() == 0 and self.average_volume.get() == 0 and len(self.tickerSymbol.get()) == 0:
             messagebox.showerror(
@@ -532,8 +527,19 @@ class PageTwo(PageOne):
         self.button5 = tk.Button(self, text='Close', command=self.quit)
         self.button5.place(x=730, y=130)
 
+        self.button6 = tk.Button(self, text="Detailed Graph",width=10,command=lambda:self.detailed_graph())
+        self.button6.place(x=400, y=750)
+
         # Display selection buttons
         self.selectionButtons()
+    def detailed_graph(self):
+        global data
+        fig = go.Figure(data=go.Ohlc(x=data['date'],
+                                     open=data['open'],
+                                     high=data['high'],
+                                     low=data['low'],
+                                     close=data['close']))
+        fig.show()
 
     def print_it(self):
         global data,avg_open,avg_close,avg_high,avg_low
@@ -546,7 +552,7 @@ class PageTwo(PageOne):
         if self.selectedValue() == 0:
             messagebox.showerror("Oops!", "Select how many days to graph")
         else:
-            self.f = Figure(figsize=(4, 4), dpi=110)
+            self.f = Figure(figsize=(7, 4), dpi=110)
             self.p = self.f.gca()
             daysVar = self.days.get()
             plot1 = self.f.add_subplot(111)
@@ -573,7 +579,7 @@ class PageTwo(PageOne):
 
     def createCanvas(self):
         self.canvas = FigureCanvasTkAgg(self.f)
-        self.canvas.get_tk_widget().place(x=30, y=200)
+        self.canvas.get_tk_widget().place(x=30, y=275)
         self.canvas.draw()
 
     # Clear Canvas
