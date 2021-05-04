@@ -38,3 +38,12 @@ This project is largely GUI oriented. The GUI was made using Tkinter. The UI con
 4. yFinance does not provide directly usable data.
 
     Solution: Used indexing.
+    
+## How to run it ?
+
+1. Clone the Repository.
+2. Change the image paths in code with respect to your system.
+3. Navigate to stockanalyzer folder.
+4. Run the file using the command `python GUI.py`
+
+And Et Voila !, the GUI will be up and running.
