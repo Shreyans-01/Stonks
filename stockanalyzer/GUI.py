@@ -1,7 +1,7 @@
 
-from predict import *
+#from predict import *
 from tkinter import *
-import tkinter.messagebox
+from tkinter import messagebox
 import tkinter.filedialog
 from PIL import ImageTk, Image
 import requests
@@ -24,6 +24,11 @@ import yfinance as yf
 import plotly.graph_objs as go
 import matplotlib.pyplot as plt
 import pandas as pd
+
+from bs4 import BeautifulSoup
+import requests
+import mouse
+import time
 matplotlib.use('TkAgg')
 
 global data, pred_val, avg_open, avg_high, avg_low, avg_close
@@ -341,7 +346,7 @@ class PageOne(tk.Frame):
     def something(self, event=None):
         global data, pred_val
         df1 = pd.DataFrame(data)
-        pred_val = processing(df1)
+        #pred_val = processing(df1)
         self.average(1)
 
     def averageTesting(self, event=None):
@@ -372,7 +377,7 @@ class PageOne(tk.Frame):
     def label_Results(self):
         # label for Results
         self.resultMsg = tk.Label(self, text="RESULTS", font=LARGE_FONT)
-        self.resultMsg.place(x=425, y=600, anchor="center")
+        self.resultMsg.place(x=425, y=550, anchor="center")
 
     def destroy(self):
         for labels in self.newVarList:
@@ -439,6 +444,44 @@ class PageOne(tk.Frame):
             self.placementValue += 25
 
         print(joinedList)
+        url='https://ca.finance.yahoo.com/quote/'+self.tickerSymbol.get()+'?p='+self.tickerSymbol.get()+'&.tsrc=fin-tre-srch'
+        # url = 'https://ca.finance.yahoo.com/quote/TSLA?p=TSLA&.tsrc=fin-tre-srch'
+        variable_time=0
+        while True:
+            try:
+                page = requests.get(url)
+                soup = BeautifulSoup(page.text, 'lxml')
+                if  soup.find('span', class_ = 'Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)')!=None:
+                    price = soup.find('span', class_ = 'Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)').text
+                    # print(price)
+                    print(self.tickerSymbol.get())
+                    root.update_idletasks()
+                    print(float(price))
+                    diff=float(price)-float(data['close'][data.shape[0]-1])
+                    diff='%.6f' %diff
+                    # diff=round(diff,4)
+                    print(diff)
+                    
+                    if float(data['close'][data.shape[0]-1])<float(price):
+                        self.stockprice = tk.Label(self, text="Current value: "+str(price)+'\n▲'+str(diff), font=NORMAL_FONT,anchor="center",fg='green')
+                        self.stockprice.place(x=350, y=575)
+                    else:
+                        self.stockprice = tk.Label(self, text="Current value: "+str(price)+'\n▼'+str(diff), font=NORMAL_FONT,anchor="center",fg='red')
+                        self.stockprice.place(x=350, y=575)
+                    # self.stockprice.config(text="")
+                    
+                    
+
+                if mouse.is_pressed("left"):
+                    break
+                root.update_idletasks()
+            except:
+                pass
+            root.update_idletasks()
+            
+
+        # price=1
+        
 
     # selection buttons
     def selectionButtons(self):
@@ -665,7 +708,7 @@ class PageThree(PageOne):
             pass
 
         if self.selectedValue() == 0:
-            messagebox.showerror("Oops!", "Select how many days to graph")
+            messagebox.showerror("Error", "Select how many days to graph")
         else:
             datae=[]
             counter=0
@@ -688,8 +731,8 @@ class PageThree(PageOne):
                     list_df[j] = list_df[j].append(new_row)
             
             for i in range(counter):
-                plot1.plot(list_df[i]['date'], list_df[i]['close'], label=str(i+1))
-            leg = plot1.legend()
+                plot1.plot(list_df[i]['date'], list_df[i]['close'], label=self.tickerSymbol[i].get())
+            leg = plot1.legend(loc="upper right")
 
             self.createCanvas()
     # Create Canvas
