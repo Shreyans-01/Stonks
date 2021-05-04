@@ -164,7 +164,7 @@ class Page(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        for F in (StartPage, PageOne, PageTwo):
+        for F in (StartPage, PageOne, PageTwo, PageThree):
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
@@ -247,16 +247,19 @@ class PageOne(tk.Frame):
             lambda: controller.show_frame("PageTwo"), self.clearLabels))
         button_graph.place(x=100, y=470)
 
+        button_compare = tk.Button(self,  text="Compare", command=combine_funcs(lambda: controller.show_frame("PageThree"), self.clearLabels))
+        button_compare.place(x=210, y=470)
+
         clear_button = tk.Button(self,  text="Clear",
                                  command=self.initialClear)
-        clear_button.place(x=250, y=470)
+        clear_button.place(x=320, y=470)
 
         restart_button = tk.Button(self, text="Restart", command=restart)
-        restart_button.place(x=370, y=470)
+        restart_button.place(x=430, y=470)
 
         button_back = tk.Button(self,  text="Back",
                                 command=combine_funcs(lambda: controller.show_frame("StartPage"), self.clear))
-        button_back.place(x=510, y=470)
+        button_back.place(x=540, y=470)
 
         # close Button
         close_button = tk.Button(self, text="Close", command=self.quit)
@@ -350,8 +353,6 @@ class PageOne(tk.Frame):
         data.columns = [str(x).lower().replace(' ', '_') for x in data.columns]
         # Convert Date column to datetime
         data.loc[:, 'date'] = pd.to_datetime(data['date'], format='%Y-%m-%d')
-        # print(self.tickerSymbol.get())
-        # processing(data)
         print(data)
         self.data = data
         data.reset_index(level=0, inplace=True)
@@ -476,8 +477,7 @@ class PageTwo(PageOne):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-        load = Image.open(
-            "/OSTPL-MiniProject/stockanalyzer/assets/graphbg.png")
+        load = Image.open("/OSTPL-MiniProject/stockanalyzer/assets/graphbg.png")
         banner = ImageTk.PhotoImage(load)
         new_image1 = load.resize((840, 200))
         banner = ImageTk.PhotoImage(new_image1)
@@ -554,7 +554,144 @@ class PageTwo(PageOne):
             leg = plot1.legend()
 
             self.createCanvas()
+    # Create Canvas
 
+    def createCanvas(self):
+        self.canvas = FigureCanvasTkAgg(self.f)
+        self.canvas.get_tk_widget().place(x=-70, y=360)
+        self.canvas.draw()
+
+    # Clear Canvas
+    def clearCanvas(self):
+        self.canvas.get_tk_widget().place_forget()
+        self.p.close()
+        page_one = self.controller.get_page("PageOne")
+        self.clear()
+        page_one.clear()
+
+    def clearBack(self):
+        self.days.set(0)
+        self.canvas.get_tk_widget().place_forget()
+        self.p.close()
+
+    # selection buttons
+
+    def selectionButtons(self):
+        # Selection calculation list
+        self.days = IntVar()
+        self.selectionButton = tk.Label(
+            self, text="How many days would you like to graph?")
+        self.selectionButton.place(x=550, y=270)
+        self.button30 = Radiobutton(
+            self, text="30 Days", variable=self.days, value=30, command=self.selectedValue)
+        self.button30.place(x=610, y=290)
+        self.button60 = Radiobutton(
+            self, text="60 Days", variable=self.days, value=60, command=self.selectedValue)
+        self.button60.place(x=610, y=310)
+        self.button90 = Radiobutton(
+            self, text="90 Days", variable=self.days, value=90, command=self.selectedValue)
+        self.button90.place(x=610, y=330)
+
+    def selectedValue(self):
+        self.daysVariable = int(self.days.get())
+        print("You selected the option ", self.daysVariable)
+        return self.daysVariable
+
+class PageThree(PageOne):
+    datae=[]
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        load = Image.open("/OSTPL-MiniProject/stockanalyzer/assets/graphbg.png")
+        banner = ImageTk.PhotoImage(load)
+        new_image1 = load.resize((840, 200))
+        banner = ImageTk.PhotoImage(new_image1)
+        w = tk.Label(self, image=banner)
+        w.image = banner
+        w.place(x=0, y=0)
+
+        # Label Ticker Symbol Input from user
+        self.user_input_tickerSymbol = tk.Label(
+            self, text="Enter Ticker Symbol: ")
+        self.user_input_tickerSymbol.place(x=60, y=250)
+
+        # Ticker Symbol Input from user
+        self.tickerSymbol=[StringVar(),StringVar(),StringVar(),StringVar(),StringVar()]
+        for i in range(5):
+            self.entry_tickerSymbol = tk.Entry(
+                self, textvariable=self.tickerSymbol[i])
+            self.entry_tickerSymbol.place(x=200 +i*100, y=250, width=100)
+
+        # button_back = tk.Button(self, text="Restart",
+        #                         command=restart)
+        # button_back.place(x=50, y=230)
+
+        self.button3 = tk.Button(
+            self, text='Clear Plot', command=self.clearCanvas)
+        self.button3.place(x=250, y=300)
+
+        self.button4 = tk.Button(self, text='Go Back', command=combine_funcs(
+            lambda: controller.show_frame("PageOne"), self.clearBack))
+        self.button4.place(x=350, y=300)
+
+        self.button5 = tk.Button(self, text='Close', command=self.quit)
+        self.button5.place(x=450, y=300)
+
+        # self.button6 = tk.Button(
+        #     self, text="Detailed Graph", width=10, command=lambda: self.detailed_graph())
+        # self.button6.place(x=400, y=810)
+        
+        button_print = tk.Button(self, text="Print",command=self.print_it)
+        button_print.place(x=150, y=300)
+
+        # Display selection buttons
+        self.selectionButtons()
+
+    def detailed_graph(self):
+        global data
+        fig = go.Figure(data=go.Ohlc(x=data['date'],
+                                     open=data['open'],
+                                     high=data['high'],
+                                     low=data['low'],
+                                     close=data['close']))
+        fig.show()
+
+    def print_it(self):
+        global data, avg_open, avg_close, avg_high, avg_low
+        try:
+            self.clearCanvas()
+            self.canvas.get_tk_widget().destory()
+        except:
+            pass
+
+        if self.selectedValue() == 0:
+            messagebox.showerror("Oops!", "Select how many days to graph")
+        else:
+            datae=[]
+            counter=0
+            for i in range(5):
+                if self.tickerSymbol[i].get()!="":
+                    datae.append(yf.download(tickers=self.tickerSymbol[i].get(),period='3y', interval='1d')) 
+                    datae[i].reset_index(level=0, inplace=True)
+                    # Change all column headings to be lower case, and remove spacing
+                    datae[i].columns = [str(x).lower().replace(' ', '_') for x in datae[i].columns]
+                    counter+=1
+                    #print(datae[i])
+            self.f = Figure(figsize=(9, 4), dpi=110)
+            self.p = self.f.gca()
+            daysVar = self.days.get()
+            plot1 = self.f.add_subplot(111)
+            list_df = [pd.DataFrame(columns=['date', 'close']),pd.DataFrame(columns=['date', 'close']),pd.DataFrame(columns=['date', 'close']),pd.DataFrame(columns=['date', 'close']),pd.DataFrame(columns=['date', 'close'])]
+            for j in range(counter):
+                for i in range(datae[j].shape[0]-1-daysVar, datae[j].shape[0]-1):
+                    new_row = pd.Series(data={'date': datae[j]['date'][i], 'close': datae[j]['close'][i]}, name=i)
+                    list_df[j] = list_df[j].append(new_row)
+            
+            for i in range(counter):
+                plot1.plot(list_df[i]['date'], list_df[i]['close'], label=str(i+1))
+            leg = plot1.legend()
+
+            self.createCanvas()
     # Create Canvas
 
     def createCanvas(self):
