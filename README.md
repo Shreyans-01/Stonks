@@ -1,4 +1,4 @@
-# Stonks - Stock Analyser
+<h1 align="center"> Stonks - Stock Analyser</h1>
 
 ## Introduction
 
