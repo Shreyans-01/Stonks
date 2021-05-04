@@ -1,4 +1,4 @@
-#Stonks - Stock Analyser
+# Stonks - Stock Analyser
 
 ## Introduction
 
