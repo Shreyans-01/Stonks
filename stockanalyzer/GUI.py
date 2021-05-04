@@ -1,5 +1,5 @@
 
-#from predict import *
+from predict import *
 from tkinter import *
 from tkinter import messagebox
 import tkinter.filedialog
@@ -305,6 +305,7 @@ class PageOne(tk.Frame):
             checkBoxes = [self.average_open, self.average_high, self.average_low,
                           self.average_close, self.average_volume]
             length = len(getValues)
+            
             for i in range(length):
                 print(getValues[i])
                 if getValues[i] == 1:
@@ -318,6 +319,7 @@ class PageOne(tk.Frame):
         self.prompt.set(" ")
         self.delete_TickerSymbolEntry()
         self.resultMsg.place_forget()
+        self.stockprice.place_forget()
         length = len(self.switches)
         for i in range(length):
             self.newVarList[i].place_forget()
@@ -346,7 +348,7 @@ class PageOne(tk.Frame):
     def something(self, event=None):
         global data, pred_val
         df1 = pd.DataFrame(data)
-        #pred_val = processing(df1)
+        pred_val = processing(df1)
         self.average(1)
 
     def averageTesting(self, event=None):
@@ -446,38 +448,44 @@ class PageOne(tk.Frame):
         print(joinedList)
         url='https://ca.finance.yahoo.com/quote/'+self.tickerSymbol.get()+'?p='+self.tickerSymbol.get()+'&.tsrc=fin-tre-srch'
         # url = 'https://ca.finance.yahoo.com/quote/TSLA?p=TSLA&.tsrc=fin-tre-srch'
-        variable_time=0
-        while True:
-            try:
-                page = requests.get(url)
-                soup = BeautifulSoup(page.text, 'lxml')
-                if  soup.find('span', class_ = 'Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)')!=None:
-                    price = soup.find('span', class_ = 'Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)').text
-                    # print(price)
-                    print(self.tickerSymbol.get())
-                    root.update_idletasks()
-                    print(float(price))
-                    diff=float(price)-float(data['close'][data.shape[0]-1])
-                    diff='%.6f' %diff
-                    # diff=round(diff,4)
-                    print(diff)
+        page = requests.get(url)
+        soup = BeautifulSoup(page.text, 'lxml')
+        price = soup.find('span', class_ = 'Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)').text
+        print(price)
+        diff=float(price)-float(data['close'][data.shape[0]-1])
+        diff='%.6f' %diff
+        if float(data['close'][data.shape[0]-1])<float(price):
+            self.stockprice = tk.Label(self, text="Current value: "+str(price)+'\n▲'+str(diff), font=NORMAL_FONT,anchor="center",fg='green')
+            self.stockprice.place(x=350, y=575)
+        else:
+            self.stockprice = tk.Label(self, text="Current value: "+str(price)+'\n▼'+str(diff), font=NORMAL_FONT,anchor="center",fg='red')
+            self.stockprice.place(x=350, y=575)
+        # while True:
+        #     try:
+        #         page = requests.get(url)
+        #         soup = BeautifulSoup(page.text, 'lxml')
+        #         if  soup.find('span', class_ = 'Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)')!=None:
+        #             price = soup.find('span', class_ = 'Trsdu(0.3s) Fw(b) Fz(36px) Mb(-4px) D(ib)').text
+        #             # print(price)
+        #             print(self.tickerSymbol.get())
+        #             root.update_idletasks()
+        #             print(float(price))
+        #             diff=float(price)-float(data['close'][data.shape[0]-1])
+        #             diff='%.6f' %diff
+        #             # diff=round(diff,4)
+        #             print(diff)
                     
-                    if float(data['close'][data.shape[0]-1])<float(price):
-                        self.stockprice = tk.Label(self, text="Current value: "+str(price)+'\n▲'+str(diff), font=NORMAL_FONT,anchor="center",fg='green')
-                        self.stockprice.place(x=350, y=575)
-                    else:
-                        self.stockprice = tk.Label(self, text="Current value: "+str(price)+'\n▼'+str(diff), font=NORMAL_FONT,anchor="center",fg='red')
-                        self.stockprice.place(x=350, y=575)
-                    # self.stockprice.config(text="")
-                    
-                    
-
-                if mouse.is_pressed("left"):
-                    break
-                root.update_idletasks()
-            except:
-                pass
-            root.update_idletasks()
+        #             if float(data['close'][data.shape[0]-1])<float(price):
+        #                 self.stockprice = tk.Label(self, text="Current value: "+str(price)+'\n▲'+str(diff), font=NORMAL_FONT,anchor="center",fg='green')
+        #                 self.stockprice.place(x=350, y=575)
+        #             else:
+        #                 self.stockprice = tk.Label(self, text="Current value: "+str(price)+'\n▼'+str(diff), font=NORMAL_FONT,anchor="center",fg='red')
+        #                 self.stockprice.place(x=350, y=575)
+        #             # self.stockprice.config(text="")
+        #         if mouse.is_pressed("left"):
+        #             break
+        #     except:
+        #         pass
             
 
         # price=1
